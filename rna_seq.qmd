@@ -1,0 +1,369 @@
+---
+title: "Pasilla_Bulk_RNA"
+format: html
+editor: visual
+author: Riya Saju
+date: 31-May-2022
+---
+
+## Installation and loading of required packages
+
+Installing the required packages and loading them by using library() in R for bulk RNA Seq Analysis.
+
+```{r}
+#| warning: false
+library(dplyr)
+library(textshape)
+library(ggplot2)
+library(viridis)
+library(Rsubread)
+library(DESeq2)
+library(pheatmap)
+library(AnnotationDbi)
+library(org.Dm.eg.db)
+library(EnhancedVolcano)
+library(clusterProfiler)
+library(enrichplot)
+library(ggplot2)
+library(ggridges)
+library(europepmc)
+library(pathview)
+library(biomaRt)
+library(dplyr)
+library(tidyverse)
+library(fgsea)
+library(ggnewscale)
+library(htmlwidgets)
+library(DT)
+library(SummarizedExperiment)
+
+```
+
+## Getting data ready for the analysis
+
+Reading sample metadata provided by the client.Making sure the required fields are present in the metadata in the format required for the analysis. Making required changes if needed to make it in the format required.
+
+```{r}
+samples <- read.delim("./data/samples.tsv")
+```
+
+Now let's have a look at the metadata.In this case, the metadata contains sample,condition and type .
+
+```{r}
+samples
+
+
+# #loading sample table for paired reads 
+# samples_paired <- samples[samples$type=="paired-end",]
+# samples_paired
+# 
+# #loading sample table for single reads 
+# samples_single <- samples[samples$type=="single-read",]
+# samples_single
+
+```
+
+## Starting from count matrix
+
+-   Making necessary changes to the sample metadata to combine condition and type
+
+-   Reading counts matrix of the client
+
+    We now have all the ingredients to prepare our data object in a form that is suitable for analysis, namely:
+
+    -   countdata: a table with the fragment counts
+
+    -   coldata: a table with information about the samples
+
+-   Construction of *DESeqDataSet* object from the matrix of counts and the sample information table
+
+```{r}
+#sample with both paired and single
+samples <- read.delim("./data/samples.tsv")
+samples$group <- paste(samples$condition ,"_", samples$type)
+```
+
+-   Now lets have a look at the edited samples metadata for exploratory analysis:
+
+```{r}
+samples
+
+Counts<- read.delim("./data/counts.tsv")
+countDataMatrix <- as.matrix(Counts[ , -1])
+rownames(countDataMatrix) <- Counts[ , 1]
+#making a dds object using counts matrix and samples metadata
+dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, design = ~ group)
+```
+
+## Exploratory Analysis and Visualization
+
+DESeq2 offers transformations for count data that stabilize the variance across the mean.it minimizes differences between samples for rows with small counts, and normalizes with respect to library size. One such transformation is the regularized-logarithm transformation or rlog2. Another transformation that similarly improves distance calculation across samples, the variance stabilizing transformation.for datasets with larger sample size, the variance stabilizing transformation will be much faster to compute.The two transformations (rlog and VST) are provided for applications other than differential testing.Raw counts work better for differential expression analysis since deseq2 has inbuild normalization.
+
+```{r}
+#rlog transformation for data visualization
+rld <- rlog(dds, blind=TRUE)
+```
+
+#PCA Plot
+
+A way to visualize sample-to-sample distances is a principal components analysis (PCA). In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
+
+```{r}
+
+plot <-plotPCA(rld, intgroup="group")
+p <- plot  + ggtitle("PCA plot - Sample Distances") 
+p
+```
+
+In the PCA Plot - PC1 , the highest variation seems to be due to the sequencing type and PC2 , is due to the condition,i.e treated / untreated. The major change in gene expression was due to the sequencing type - paired / single in this case which will act as a noise in trying to find out the real differentially expressed genes due to the depletion of pasilla gene.
+
+Inferences :
+
+1.  Identified the batch effect and will add while modelling deseq2
+2.  Found that major sample-sample distance was caused due to sequencing type
+3.  Shows sample-sample distance based on gene expression
+4.  Did not remove any outlier samples as it looked okayish
+
+#Heatmap
+
+Sample - sample distance can be viewed in Heatmap also. A heatmap of this distance matrix gives us an overview over similarities and dissimilarities between samples. We have to provide a hierarchical clustering hc to the heatmap function based on the sample distances, or else the heatmap function would calculate a clustering based on the distances between the rows/columns of the distance matrix.
+
+```{r}
+rld_mat <- assay(rld) 
+rld_cor <- cor(rld_mat) 
+head(rld_cor)
+samples_initial<- read.delim("./data/samples.tsv")
+annot_col <- samples_initial%>%
+  column_to_rownames('sample') %>%
+  dplyr::select(type) %>%
+  as.data.frame()
+
+pheatmap(mat=rld_cor,main = "Heatmap - Sample Distances",color = viridis(n=256),
+annotation_col = annot_col)
+
+```
+
+Inferences:
+
+1.  Every sample seems correlated.-more than 0.99.
+2.  Treated2 and treated 3 , untreated 3 and untreated 4 shows high similarity due to sequencing type
+3.  Untreated_paired & Untreated_single supposed to be similar but not due to batch effect same goes with Treated
+4.  More clustering based on batch effect rather than on condition.
+5.  Untreated_single(76,82) didn't show much similarity as expected.
+
+##DESEQ2 Analysis
+
+```{r}
+#DESEQ2 with condition and layout as factors 
+dds_seq <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, design = ~type + condition) 
+dds_seq
+
+keep <- rowSums(counts(dds_seq)) >= 10
+dds_seq <- dds_seq[keep, ]
+
+#deseq2 analysis
+dds_seq <- DESeq(dds_seq)
+res <- results(dds_seq, contrast = c("condition",  "treated", "untreated"))
+res
+mcols(res, use.names = TRUE)
+summary(res)
+```
+
+##Annotating to other names-entrez/gene symbol
+
+```{r}
+columns(org.Dm.eg.db)
+
+#mapping ensembl id to enrez id and gene symbol using mapIds
+ids <- strsplit(rownames(res), ".", fixed = TRUE)
+ids <- sapply(ids, head, n = 1)
+#for symbol
+res$symbol <- mapIds(
+  x = org.Dm.eg.db,
+  keys = ids,
+  column = "SYMBOL",
+  keytype = "ENSEMBL",
+  multiVals = "first"
+)
+#for entrez id
+res$entrez <- mapIds(
+  x = org.Dm.eg.db,
+  keys = ids,
+  column = "ENTREZID",
+  keytype = "ENSEMBL",
+  multiVals = "first"
+)
+# Output the first few lines of the results table
+head(res)
+
+#writing the results to csv files
+write.csv(as.data.frame(res), file = "./results/deseq2/Treated-Untreated.results.csv")
+
+#filtering the significant genes with padj < 0.05
+res_sig <- subset(res, padj < 0.05)
+
+#filtering again the significant genes with lfc>1 from res_sig
+res_lfc<- subset(res_sig, abs(log2FoldChange) > 1)
+res_lfc_new<-as.data.frame(res_lfc) 
+res_lfc_new
+DT::datatable(res_lfc_new)
+write.csv(as.data.frame(res_sig), file = "./results/deseq2/Treated-Untreated.signif.csv")
+write.csv(as.data.frame(res_lfc), file = "./results/deseq2/Treated-Untreated.signif-lfc.csv")
+
+#saving the final results to rds object
+saveRDS(res_lfc,"./results/deseq2/sign_results.rds")
+
+```
+
+##Plotting of DESEQ2 results
+
+```{r}
+#getting the top genes
+
+top <- rownames(res)[which.min(res$padj)]
+top_gene<-res$symbol[[top]] 
+top_gene
+
+#plotCounts
+
+plotCounts(dds_seq, gene = top, intgroup = "condition", main = top_gene) 
+
+#plotMA
+
+plotMA(res,main ="MA Plot of Differentially Expressed genes")
+abline(h=c(-1,1), col="dodgerblue", lwd=2)
+legend(1e+04, 3, legend=c("Non Sign", "Sign"), 
+       fill = c("grey","blue")) 
+
+
+
+#some extra plots:
+#volcanoplot
+
+EnhancedVolcano(res,
+                lab = res$symbol,
+                x = 'log2FoldChange',
+                y = 'pvalue',
+                title = 'Volcano Plot of Differentially Expressed genes',
+                pCutoff = 10e-32,
+                FCcutoff = 2,
+                pointSize = 3.0,
+                labSize = 6.0 ,
+                )
+
+
+#heatmap
+
+
+#genes_nobatch<-order(res_lfc_nobatch$log2FoldChange, decreasing=TRUE)[1:20]
+#res_lfc<-res_lfc[complete.cases(res_lfc), ]
+#rownames(res_lfc) <- res_lfc$symbol
+
+
+genes <- order(res_lfc$log2FoldChange, decreasing=TRUE)[1:20]
+genes
+gene_names<-rownames(res_lfc)[genes]
+
+
+
+names<-res_lfc$symbol[gene_names]
+names
+names<-data.frame(names)
+
+
+
+
+colnames(assay(rld)[gene_names,])
+new<-cbind(names,assay(rld)[gene_names,])
+#rownames(new)<-new$names
+df <- subset (new, select = -names)
+
+
+
+
+annot_col <- samples_initial%>%
+  column_to_rownames('sample') %>%
+  dplyr::select(condition,type) %>%
+  as.data.frame()
+
+
+
+
+#assay(vsd)[genes, ]
+
+
+pheatmap(df, cluster_rows=TRUE, labels_row = names$names,legend_breaks = -2:2,
+         cluster_cols=FALSE, annotation_col=annot_col, main= "Heatmap of expression of genes",scale = "row")
+         
+
+```
+
+#\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*GSEA\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* #Go
+
+```{r}
+
+
+
+
+#reading in data from deseq2
+df = read.csv("./results/deseq2/Treated-Untreated.signif-lfc.csv", header=TRUE)
+
+# we want the log2 fold change 
+original_gene_list <- df$log2FoldChange
+
+# name the vector
+df$X<-df$symbol
+names(original_gene_list) <- df$X
+
+# omit any NA values 
+gene_list<-na.omit(original_gene_list)
+
+# sort the list in decreasing order (required for clusterProfiler)
+gene_list = sort(gene_list, decreasing = TRUE)
+gene_list
+
+keytypes(org.Dm.eg.db)
+
+gse <- gseGO(geneList=gene_list, 
+             ont ="ALL", 
+             keyType = "SYMBOL", 
+             nPerm = 10000, 
+             minGSSize = 3, 
+             maxGSSize = 800, 
+             pvalueCutoff = 0.05, 
+             verbose = TRUE, 
+             OrgDb = org.Dm.eg.db, 
+             pAdjustMethod = "none")
+#dotplot
+require(DOSE)
+
+dotplot(gse, showCategory=10, split=".sign") + facet_grid(.~.sign)
+
+
+#enrichment map
+
+gse_emap<-pairwise_termsim(gse) 
+
+emapplot(gse_emap, showCategory = 10)
+
+
+#category net plot
+# categorySize can be either 'pvalue' or 'geneNum'
+
+cnetplot(gse, categorySize="pvalue", foldChange=gene_list, showCategory = 10)
+
+#ridgeplot
+
+ridgeplot(gse,showCategory = 15) + labs(x = "enrichment distribution") + theme_ridges(font_size = 10,  line_size = 3)
+
+#gseaplot
+
+gseaplot(gse, by = "all", title = gse$Description[1], geneSetID = 1)
+
+#pubmed
+
+terms <- gse$Description[1:10]
+pmcplot(terms, 2012:2022, proportion=FALSE)
+
+
+```

@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.446">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Riya Saju">
+<meta name="dcterms.date" content="2022-05-31">
+
+<title>Pasilla_Bulk_RNA</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<script src="rna_seq_files/libs/clipboard/clipboard.min.js"></script>
+<script src="rna_seq_files/libs/quarto-html/quarto.js"></script>
+<script src="rna_seq_files/libs/quarto-html/popper.min.js"></script>
+<script src="rna_seq_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="rna_seq_files/libs/quarto-html/anchor.min.js"></script>
+<link href="rna_seq_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link id="quarto-text-highlighting-styles" href="rna_seq_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<script src="rna_seq_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="rna_seq_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="rna_seq_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+<script src="rna_seq_files\libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<link href="rna_seq_files\libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="rna_seq_files\libs/datatables-binding-0.23/datatables.js"></script>
+<script src="rna_seq_files\libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="rna_seq_files\libs/dt-core-1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="rna_seq_files\libs/dt-core-1.11.3/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="rna_seq_files\libs/dt-core-1.11.3/js/jquery.dataTables.min.js"></script>
+<link href="rna_seq_files\libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="rna_seq_files\libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Pasilla_Bulk_RNA</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Riya Saju </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 31, 2022</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+</header>
+
+<section id="installation-and-loading-of-required-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installation-and-loading-of-required-packages">Installation and loading of required packages</h2>
+<p>Install the required packages and load them by using library()</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("dplyr")</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("textshape")</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(textshape)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("ggplot2")</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("viridis")</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(viridis)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#if (!require("BiocManager", quietly = TRUE))</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#install.packages("BiocManager")</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install(version = "3.14")</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install("Rsubread")</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#loading Rsubread for using featureCounts </span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Rsubread)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install("DESeq2")</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DESeq2)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("pheatmap")</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"pheatmap"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AnnotationDbi)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install("org.Dm.eg.db")</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.Dm.eg.db)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install('EnhancedVolcano')</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">'EnhancedVolcano'</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install("clusterProfiler")</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install("pathview")</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install("enrichplot")</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("ggridges")</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(clusterProfiler)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(enrichplot)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggridges)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co">#org.Dm.eg.db = "org.Dm.eg.db"</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install(org.Dm.eg.db, character.only = TRUE)</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("europepmc")</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"europepmc"</span>)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pathview)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co">#BiocManager::install("biomaRt")</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(biomaRt)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fgsea)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("ggnewscale")</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggnewscale)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("htmlwidgets")</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(htmlwidgets)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages('DT')</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DT)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SummarizedExperiment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="getting-data-ready-for-the-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="getting-data-ready-for-the-analysis">Getting data ready for the analysis</h2>
+<p>Loading sample table<br>
+Construct path to BAM files created by the read alignment step - paired reads</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>samples <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">"./data/samples.tsv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>samples</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      sample condition        type
+1 untreated1 untreated single-read
+2 untreated2 untreated single-read
+3 untreated3 untreated  paired-end
+4 untreated4 untreated  paired-end
+5   treated1   treated single-read
+6   treated2   treated  paired-end
+7   treated3   treated  paired-end</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#loading sample table for paired reads </span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>samples_paired <span class="ot">&lt;-</span> samples[samples<span class="sc">$</span>type<span class="sc">==</span><span class="st">"paired-end"</span>,]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>samples_paired</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      sample condition       type
+3 untreated3 untreated paired-end
+4 untreated4 untreated paired-end
+6   treated2   treated paired-end
+7   treated3   treated paired-end</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#loading sample table for single reads </span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>samples_single <span class="ot">&lt;-</span> samples[samples<span class="sc">$</span>type<span class="sc">==</span><span class="st">"single-read"</span>,]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>samples_single</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      sample condition        type
+1 untreated1 untreated single-read
+2 untreated2 untreated single-read
+5   treated1   treated single-read</code></pre>
+</div>
+</div>
+</section>
+<section id="qc-plots-of-samples" class="level2">
+<h2 class="anchored" data-anchor-id="qc-plots-of-samples">QC plots of samples</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#sample with both paired and single</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>samples <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">"./data/samples.tsv"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>samples<span class="sc">$</span>group <span class="ot">&lt;-</span> <span class="fu">paste</span>(samples<span class="sc">$</span>condition ,<span class="st">"_"</span>, samples<span class="sc">$</span>type)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>samples</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      sample condition        type                   group
+1 untreated1 untreated single-read untreated _ single-read
+2 untreated2 untreated single-read untreated _ single-read
+3 untreated3 untreated  paired-end  untreated _ paired-end
+4 untreated4 untreated  paired-end  untreated _ paired-end
+5   treated1   treated single-read   treated _ single-read
+6   treated2   treated  paired-end    treated _ paired-end
+7   treated3   treated  paired-end    treated _ paired-end</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#samples</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>Counts<span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">"./data/counts.tsv"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>countDataMatrix <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Counts[ , <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(countDataMatrix) <span class="ot">&lt;-</span> Counts[ , <span class="dv">1</span>]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#object creation</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeqDataSetFromMatrix</span>(<span class="at">countData =</span> countDataMatrix, <span class="at">colData =</span> samples, <span class="at">design =</span> <span class="sc">~</span> group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in DESeqDataSet(se, design = design, ignoreRank): some variables in
+design formula are characters, converting to factors</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  Note: levels of factors in the design contain characters other than
+  letters, numbers, '_' and '.'. It is recommended (but not required) to use
+  only letters, numbers, and delimiters '_' or '.', as these are safe characters
+  for column names in R. [This is a message, not a warning or an error]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: DESeqDataSet 
+dim: 14599 7 
+metadata(1): version
+assays(1): counts
+rownames(14599): FBgn0000003 FBgn0000008 ... FBgn0261574 FBgn0261575
+rowData names(0):
+colnames(7): untreated1 untreated2 ... treated2 treated3
+colData names(4): sample condition type group</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#rlog transformation for data visualization</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#which minimizes differences between samples for rows with small counts, </span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#and which normalizes with respect to library size.</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#rlog/vsd</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>rld <span class="ot">&lt;-</span> <span class="fu">rlog</span>(dds, <span class="at">blind=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  Note: levels of factors in the design contain characters other than
+  letters, numbers, '_' and '.'. It is recommended (but not required) to use
+  only letters, numbers, and delimiters '_' or '.', as these are safe characters
+  for column names in R. [This is a message, not a warning or an error]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span><span class="fu">plotPCA</span>(rld, <span class="at">intgroup=</span><span class="st">"group"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> plot  <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"PCA plot - Sample Distances"</span>) <span class="sc">+</span>  <span class="fu">scale_color_viridis</span>(<span class="at">discrete=</span><span class="cn">TRUE</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Heatmap</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>rld_mat <span class="ot">&lt;-</span> <span class="fu">assay</span>(rld) </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>rld_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(rld_mat) </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(rld_cor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           untreated1 untreated2 untreated3 untreated4  treated1  treated2
+untreated1  1.0000000  0.9996252  0.9995483  0.9996643 0.9994090 0.9993724
+untreated2  0.9996252  1.0000000  0.9996821  0.9996692 0.9994955 0.9993300
+untreated3  0.9995483  0.9996821  1.0000000  0.9998369 0.9992217 0.9995390
+untreated4  0.9996643  0.9996692  0.9998369  1.0000000 0.9992633 0.9995996
+treated1    0.9994090  0.9994955  0.9992217  0.9992633 1.0000000 0.9995750
+treated2    0.9993724  0.9993300  0.9995390  0.9995996 0.9995750 1.0000000
+            treated3
+untreated1 0.9993237
+untreated2 0.9992963
+untreated3 0.9995185
+untreated4 0.9996140
+treated1   0.9995168
+treated2   0.9999245</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>samples_initial<span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">"./data/samples.tsv"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>annot_col <span class="ot">&lt;-</span> samples_initial<span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">column_to_rownames</span>(<span class="st">'sample'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(type) <span class="sc">%&gt;%</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co">#cbbPalette &lt;- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(<span class="at">mat=</span>rld_cor,<span class="at">main =</span> <span class="st">"Heatmap - Sample Distances"</span>,<span class="at">color =</span> <span class="fu">viridis</span>(<span class="at">n=</span><span class="dv">256</span>),</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="at">annotation_col =</span> annot_col)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The <code>echo: false</code> option disables the printing of code (only output is displayed).</p>
+<p>##DESEQ2 Analysis</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#DESEQ2 with condition and layout as factors </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>dds_seq <span class="ot">&lt;-</span> <span class="fu">DESeqDataSetFromMatrix</span>(<span class="at">countData =</span> countDataMatrix, <span class="at">colData =</span> samples, <span class="at">design =</span> <span class="sc">~</span>type <span class="sc">+</span> condition) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in DESeqDataSet(se, design = design, ignoreRank): some variables in
+design formula are characters, converting to factors</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  Note: levels of factors in the design contain characters other than
+  letters, numbers, '_' and '.'. It is recommended (but not required) to use
+  only letters, numbers, and delimiters '_' or '.', as these are safe characters
+  for column names in R. [This is a message, not a warning or an error]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>dds_seq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: DESeqDataSet 
+dim: 14599 7 
+metadata(1): version
+assays(1): counts
+rownames(14599): FBgn0000003 FBgn0000008 ... FBgn0261574 FBgn0261575
+rowData names(0):
+colnames(7): untreated1 untreated2 ... treated2 treated3
+colData names(4): sample condition type group</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(dds_seq)) <span class="sc">&gt;=</span> <span class="dv">10</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>dds_seq <span class="ot">&lt;-</span> dds_seq[keep, ]</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">#deseq2 analysis</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>dds_seq <span class="ot">&lt;-</span> <span class="fu">DESeq</span>(dds_seq)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>estimating size factors
+  Note: levels of factors in the design contain characters other than
+  letters, numbers, '_' and '.'. It is recommended (but not required) to use
+  only letters, numbers, and delimiters '_' or '.', as these are safe characters
+  for column names in R. [This is a message, not a warning or an error]</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>estimating dispersions</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>gene-wise dispersion estimates</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>mean-dispersion relationship</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  Note: levels of factors in the design contain characters other than
+  letters, numbers, '_' and '.'. It is recommended (but not required) to use
+  only letters, numbers, and delimiters '_' or '.', as these are safe characters
+  for column names in R. [This is a message, not a warning or an error]</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>final dispersion estimates</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  Note: levels of factors in the design contain characters other than
+  letters, numbers, '_' and '.'. It is recommended (but not required) to use
+  only letters, numbers, and delimiters '_' or '.', as these are safe characters
+  for column names in R. [This is a message, not a warning or an error]</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>fitting model and testing</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">results</span>(dds_seq, <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"condition"</span>,  <span class="st">"treated"</span>, <span class="st">"untreated"</span>))</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log2 fold change (MLE): condition treated vs untreated 
+Wald test p-value: condition treated vs untreated 
+DataFrame with 9921 rows and 6 columns
+              baseMean log2FoldChange     lfcSE       stat    pvalue      padj
+             &lt;numeric&gt;      &lt;numeric&gt; &lt;numeric&gt;  &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
+FBgn0000008   95.14429     -0.0405574  0.220040 -0.1843184  0.853764  0.949442
+FBgn0000014    1.05652     -0.0834936  2.075676 -0.0402248  0.967914        NA
+FBgn0000017 4352.55357     -0.2560572  0.112230 -2.2815484  0.022516  0.130353
+FBgn0000018  418.61048     -0.0646154  0.131349 -0.4919353  0.622765  0.859352
+FBgn0000024    6.40620      0.3089547  0.755886  0.4087319  0.682736  0.887744
+...                ...            ...       ...        ...       ...       ...
+FBgn0261570 3208.38861      0.2589831  0.105127   2.463526 0.0137578 0.0908776
+FBgn0261572    6.19719     -0.9754562  0.807343  -1.208229 0.2269590 0.5588345
+FBgn0261573 2240.97951     -0.0107132  0.101906  -0.105128 0.9162740 0.9704006
+FBgn0261574 4857.68037      0.0719383  0.121127   0.593908 0.5525735 0.8256556
+FBgn0261575   10.68252      0.5731014  0.747158   0.767042 0.4430565 0.7519263</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcols</span>(res, <span class="at">use.names =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 6 rows and 2 columns
+                       type            description
+                &lt;character&gt;            &lt;character&gt;
+baseMean       intermediate mean of normalized c..
+log2FoldChange      results log2 fold change (ML..
+lfcSE               results standard error: cond..
+stat                results Wald statistic: cond..
+pvalue              results Wald test p-value: c..
+padj                results   BH adjusted p-values</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+out of 9921 with nonzero total read count
+adjusted p-value &lt; 0.1
+LFC &gt; 0 (up)       : 619, 6.2%
+LFC &lt; 0 (down)     : 724, 7.3%
+outliers [1]       : 0, 0%
+low counts [2]     : 1347, 14%
+(mean count &lt; 5)
+[1] see 'cooksCutoff' argument of ?results
+[2] see 'independentFiltering' argument of ?results</code></pre>
+</div>
+</div>
+<p>##Annotating to other names-entrez/gene symbol</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">columns</span>(org.Dm.eg.db)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "ACCNUM"       "ALIAS"        "ENSEMBL"      "ENSEMBLPROT"  "ENSEMBLTRANS"
+ [6] "ENTREZID"     "ENZYME"       "EVIDENCE"     "EVIDENCEALL"  "FLYBASE"     
+[11] "FLYBASECG"    "FLYBASEPROT"  "GENENAME"     "GENETYPE"     "GO"          
+[16] "GOALL"        "MAP"          "ONTOLOGY"     "ONTOLOGYALL"  "PATH"        
+[21] "PMID"         "REFSEQ"       "SYMBOL"       "UNIPROT"     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#mapping ensembl id to enrez id and gene symbol using mapIds</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(<span class="fu">rownames</span>(res), <span class="st">"."</span>, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ids, head, <span class="at">n =</span> <span class="dv">1</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co">#for symbol</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>symbol <span class="ot">&lt;-</span> <span class="fu">mapIds</span>(</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> org.Dm.eg.db,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">keys =</span> ids,</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">column =</span> <span class="st">"SYMBOL"</span>,</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">keytype =</span> <span class="st">"ENSEMBL"</span>,</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">multiVals =</span> <span class="st">"first"</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>'select()' returned 1:many mapping between keys and columns</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co">#for entrez id</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>entrez <span class="ot">&lt;-</span> <span class="fu">mapIds</span>(</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> org.Dm.eg.db,</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">keys =</span> ids,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">column =</span> <span class="st">"ENTREZID"</span>,</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">keytype =</span> <span class="st">"ENSEMBL"</span>,</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">multiVals =</span> <span class="st">"first"</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>'select()' returned 1:many mapping between keys and columns</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Output the first few lines of the results table</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log2 fold change (MLE): condition treated vs untreated 
+Wald test p-value: condition treated vs untreated 
+DataFrame with 6 rows and 8 columns
+              baseMean log2FoldChange     lfcSE       stat    pvalue      padj
+             &lt;numeric&gt;      &lt;numeric&gt; &lt;numeric&gt;  &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
+FBgn0000008   95.14429     -0.0405574  0.220040 -0.1843184  0.853764  0.949442
+FBgn0000014    1.05652     -0.0834936  2.075676 -0.0402248  0.967914        NA
+FBgn0000017 4352.55357     -0.2560572  0.112230 -2.2815484  0.022516  0.130353
+FBgn0000018  418.61048     -0.0646154  0.131349 -0.4919353  0.622765  0.859352
+FBgn0000024    6.40620      0.3089547  0.755886  0.4087319  0.682736  0.887744
+FBgn0000032  989.72022     -0.0483794  0.120853 -0.4003151  0.688924  0.890198
+                 symbol      entrez
+            &lt;character&gt; &lt;character&gt;
+FBgn0000008           a       43852
+FBgn0000014       abd-A       42037
+FBgn0000017         Abl       45821
+FBgn0000018         abo       44793
+FBgn0000024         Ace       41625
+FBgn0000032      Acph-1       48445</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co">#writing the results to csv files</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">as.data.frame</span>(res), <span class="at">file =</span> <span class="st">"./results/deseq2/Treated-Untreated.results.csv"</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="co">#filtering the significant genes with padj &lt; 0.05</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>res_sig <span class="ot">&lt;-</span> <span class="fu">subset</span>(res, padj <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a><span class="co">#filtering again the significant genes with lfc&gt;1 from res_sig</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>res_lfc<span class="ot">&lt;-</span> <span class="fu">subset</span>(res_sig, <span class="fu">abs</span>(log2FoldChange) <span class="sc">&gt;</span> <span class="dv">1</span>)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>res_lfc_new<span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(res_lfc) </span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>res_lfc_new</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                baseMean log2FoldChange      lfcSE       stat        pvalue
+FBgn0000071   342.246488       2.621449 0.15798140  16.593405  7.778216e-62
+FBgn0000078    29.015948      -1.145017 0.37602876  -3.045025  2.326610e-03
+FBgn0000079   159.517803      -1.267410 0.18419442  -6.880826  5.950634e-12
+FBgn0000116   658.401186       1.194226 0.14410357   8.287273  1.158746e-16
+FBgn0000406   265.504534      -2.075420 0.22276405  -9.316676  1.200422e-20
+FBgn0000567   261.174490      -1.229653 0.16588686  -7.412598  1.238489e-13
+FBgn0001137   494.049368      -1.228424 0.14356595  -8.556511  1.163348e-17
+FBgn0001224   598.932007       1.468211 0.13421984  10.938850  7.514676e-28
+FBgn0001225   420.302629       1.307491 0.13458145   9.715242  2.596323e-22
+FBgn0001226  1323.909436       1.665793 0.13123808  12.692908  6.473669e-37
+FBgn0001967    14.346242      -1.981340 0.56340249  -3.516739  4.368829e-04
+FBgn0002609    43.255114      -1.464358 0.33941574  -4.314349  1.600740e-05
+FBgn0002773    41.104766      -1.205190 0.34012111  -3.543414  3.949821e-04
+FBgn0002868   100.129907      -2.044324 0.24121667  -8.475054  2.349706e-17
+FBgn0002945    55.488411      -1.031153 0.32238486  -3.198516  1.381369e-03
+FBgn0003360  4342.832062      -3.126667 0.10926908 -28.614377 4.450947e-180
+FBgn0003366    17.712074      -1.893449 0.51455725  -3.679763  2.334507e-04
+FBgn0003447    36.305184       1.954008 0.35579331   5.491975  3.974638e-08
+FBgn0003501   277.460810       2.132372 0.17245807  12.364582  4.063178e-35
+FBgn0003748  1095.974187       1.100113 0.10165539  10.821980  2.708618e-27
+FBgn0004396  2423.417763       1.113405 0.15326014   7.264802  3.735855e-13
+FBgn0010223    65.403751      -1.404094 0.26312149  -5.336295  9.486485e-08
+FBgn0011260   211.129678       2.159577 0.20617317  10.474579  1.130395e-25
+FBgn0015568   210.367106       1.061834 0.16644305   6.379566  1.775903e-10
+FBgn0016715   150.872486      -2.007548 0.19935846 -10.070043  7.494556e-24
+FBgn0020248    35.626397       2.088991 0.35107395   5.950288  2.676707e-09
+FBgn0020376    40.813028      -1.488565 0.35374718  -4.207992  2.576495e-05
+FBgn0023479  3091.781965      -1.532187 0.12490505 -12.266812  1.365237e-34
+FBgn0023549   216.537978      -1.617718 0.19016158  -8.507073  1.783787e-17
+FBgn0024288    58.849488      -4.621356 0.46807423  -9.873126  5.444080e-23
+FBgn0024315    92.084027      -2.293948 0.24443703  -9.384616  6.314598e-21
+FBgn0024836    16.456649       1.432798 0.50703642   2.825829  4.715842e-03
+FBgn0024977    28.443749       1.037978 0.37651716   2.756789  5.837199e-03
+FBgn0024984   120.724373       1.438535 0.19815931   7.259485  3.885678e-13
+FBgn0025111  1501.447930       2.852111 0.10460910  27.264465 1.119774e-163
+FBgn0025836    93.724469      -1.042482 0.23317178  -4.470874  7.790063e-06
+FBgn0026415    46.955810       1.143242 0.29446889   3.882388  1.034358e-04
+FBgn0026562 43909.444384      -2.477764 0.08830643 -28.058708 3.127735e-173
+FBgn0027279  2954.907263      -1.182600 0.09303298 -12.711623  5.096554e-37
+FBgn0027348   172.975837      -1.226876 0.20120897  -6.097520  1.077265e-09
+FBgn0028373    42.060920       1.263557 0.35179558   3.591735  3.284832e-04
+FBgn0028433    92.723323      -1.315420 0.22510840  -5.843497  5.111630e-09
+FBgn0028434    83.665468       1.022867 0.23756760   4.305582  1.665476e-05
+FBgn0028542  1164.012273      -1.054610 0.15172609  -6.950750  3.633485e-12
+FBgn0028939    20.027723      -2.445096 0.51566271  -4.741657  2.119768e-06
+FBgn0029002  1587.743463       1.422789 0.32781918   4.340165  1.423760e-05
+FBgn0029090    43.536676      -1.527000 0.31724091  -4.813376  1.484020e-06
+FBgn0029167  3706.024008      -2.197023 0.09676521 -22.704676 4.027903e-114
+FBgn0029896   489.877247      -2.442903 0.14740104 -16.573175  1.089203e-61
+FBgn0030041    86.870889      -2.834946 0.32433919  -8.740682  2.317080e-18
+FBgn0030051    32.900436       1.026777 0.34736033   2.955942  3.117157e-03
+FBgn0030326   140.617104      -1.260132 0.22848917  -5.515061  3.486589e-08
+FBgn0030598    37.950263       2.157050 0.34962248   6.169655  6.843918e-10
+FBgn0030634     8.035543      -3.201285 0.93279595  -3.431924  5.993160e-04
+FBgn0030805   340.916156       1.000622 0.13288663   7.529889  5.078354e-14
+FBgn0030954    17.009143       1.452808 0.47843583   3.036579  2.392794e-03
+FBgn0031150   795.375915       1.242528 0.10929168  11.368919  5.972269e-30
+FBgn0031258   107.568117      -1.309367 0.24084412  -5.436575  5.431454e-08
+FBgn0031322   396.807064      -1.489171 0.15359732  -9.695295  3.157255e-22
+FBgn0031327   756.387956       1.195179 0.13865712   8.619676  6.714388e-18
+FBgn0031464    29.164406      -1.084596 0.38156086  -2.842525  4.475776e-03
+FBgn0031547   265.287106      -1.354087 0.20693685  -6.543481  6.010312e-11
+FBgn0031548    53.664450      -1.894921 0.32318247  -5.863315  4.537163e-09
+FBgn0031688    30.803835       1.661624 0.38495627   4.316398  1.585961e-05
+FBgn0031689   274.174934       1.002677 0.14721956   6.810756  9.708704e-12
+FBgn0031703    90.819399      -1.859467 0.26209667  -7.094584  1.297410e-12
+FBgn0031912  1318.332252      -1.119302 0.10417123 -10.744830  6.267747e-27
+FBgn0032004   961.575716      -1.147062 0.13392283  -8.565097  1.079852e-17
+FBgn0032405    79.615991       2.654547 0.25736233  10.314435  6.063663e-25
+FBgn0032436    17.279626       2.328448 0.54017042   4.310579  1.628273e-05
+FBgn0032498    57.356567       1.066365 0.29140491   3.659391  2.528153e-04
+FBgn0032598   315.324408       1.053058 0.13844616   7.606263  2.821345e-14
+FBgn0032638   131.934791      -1.386681 0.21418510  -6.474218  9.530428e-11
+FBgn0032808    28.344773      -1.174762 0.40546826  -2.897296  3.763940e-03
+FBgn0033065    29.948290       2.969577 0.43696124   6.795974  1.075829e-11
+FBgn0033113   373.890809       1.047618 0.18677856   5.608878  2.036428e-08
+FBgn0033363    70.229443      -1.008053 0.25581781  -3.940511  8.130809e-05
+FBgn0033367 15324.971004       1.379992 0.15700158   8.789669  1.500007e-18
+FBgn0033368    63.816051       1.314689 0.28297080   4.646022  3.383961e-06
+FBgn0033446    81.544571      -1.093136 0.24512888  -4.459436  8.217580e-06
+FBgn0033458    41.110467       1.142739 0.33892464   3.371661  7.471633e-04
+FBgn0033495    66.427695      -2.023454 0.36014110  -5.618503  1.926193e-08
+FBgn0033541    22.748071       1.136780 0.40989029   2.773376  5.547797e-03
+FBgn0033635  2490.120650       1.185696 0.14043386   8.443093  3.090486e-17
+FBgn0033724   152.834926       1.401176 0.20595977   6.803155  1.023521e-11
+FBgn0033764    65.205928       3.417176 0.31257047  10.932496  8.060023e-28
+FBgn0033775    46.880972       1.938504 0.31071724   6.238803  4.409321e-10
+FBgn0033782   162.226102      -1.430676 0.20782194  -6.884145  5.813550e-12
+FBgn0033857    17.540105       1.801498 0.53808385   3.347987  8.140092e-04
+FBgn0033913  5212.961765      -1.169494 0.10032710 -11.656812  2.118257e-31
+FBgn0034010   547.240149      -1.462915 0.13283963 -11.012637  3.321379e-28
+FBgn0034139    28.900064       1.210632 0.36918679   3.279186  1.041068e-03
+FBgn0034160    42.037372      -1.016052 0.36694828  -2.768924  5.624168e-03
+FBgn0034225    49.100788      -1.314023 0.31213427  -4.209802  2.555949e-05
+FBgn0034290    13.536823      -1.838048 0.60230554  -3.051686  2.275599e-03
+FBgn0034389   110.747440      -1.915063 0.24990581  -7.663139  1.814429e-14
+FBgn0034391    65.127431       1.519839 0.26601261   5.713408  1.107358e-08
+FBgn0034403    68.035308       1.061028 0.27498662   3.858470  1.140990e-04
+FBgn0034434   114.623344      -3.651881 0.27666024 -13.199875  8.788115e-40
+FBgn0034438    74.595498       1.913676 0.25819240   7.411820  1.245782e-13
+FBgn0034636    15.165917      -2.366750 0.63410651  -3.732418  1.896508e-04
+FBgn0034718   496.043919       1.348955 0.19142222   7.047015  1.827965e-12
+FBgn0034736   225.870672      -3.534953 0.20475119 -17.264627  8.686379e-67
+FBgn0034751 16640.845984      -1.084311 0.10354383 -10.471996  1.161679e-25
+FBgn0034804    39.021955      -1.475708 0.36372799  -4.057174  4.967000e-05
+FBgn0034885   160.525287       1.566312 0.19550624   8.011573  1.132508e-15
+FBgn0034897   892.485155      -1.933886 0.14074841 -13.740024  5.845647e-43
+FBgn0034898     6.681864      -2.770227 0.92530761  -2.993844  2.754867e-03
+FBgn0035076    30.812615       1.311453 0.37361942   3.510131  4.478860e-04
+FBgn0035085   638.219336      -2.583128 0.12924092 -19.986922  7.157678e-89
+FBgn0035147 19322.701302      -1.176664 0.10898588 -10.796479  3.576560e-27
+FBgn0035189   215.654948       2.890949 0.21580601  13.396052  6.376620e-41
+FBgn0035266   383.495666       1.006896 0.15196416   6.625879  3.451873e-11
+FBgn0035344    77.388934      -1.659217 0.24910292  -6.660767  2.724013e-11
+FBgn0035523    47.904790       1.609258 0.35608129   4.519355  6.202834e-06
+FBgn0035539    20.481843       1.762661 0.50055570   3.521408  4.292615e-04
+FBgn0035710    17.349688       2.325618 0.54770142   4.246142  2.174827e-05
+FBgn0035727    65.239005       1.564753 0.25758410   6.074727  1.241988e-09
+FBgn0035765   556.565720       1.028553 0.12259540   8.389819  4.868908e-17
+FBgn0035789    13.615091      -2.593216 0.76158025  -3.405047  6.615276e-04
+FBgn0035932    27.393267       1.500421 0.40569154   3.698427  2.169396e-04
+FBgn0035957    14.209012       1.742019 0.57192897   3.045866  2.320110e-03
+FBgn0035968   295.082688       1.098447 0.14324466   7.668325  1.742563e-14
+FBgn0035969    12.914803       1.706241 0.58708800   2.906278  3.657567e-03
+FBgn0036181    89.452668      -1.012775 0.27413261  -3.694471  2.203450e-04
+FBgn0036287    14.181872       1.662677 0.58968665   2.819594  4.808443e-03
+FBgn0036373  3859.039519      -1.067715 0.14106124  -7.569158  3.756507e-14
+FBgn0036560    18.894953       2.265694 0.50419832   4.493655  7.001089e-06
+FBgn0036576  1775.627835      -1.105644 0.15162362  -7.292027  3.053256e-13
+FBgn0036801    33.925490      -1.057524 0.36047239  -2.933718  3.349285e-03
+FBgn0036821   416.309297      -1.749034 0.47271254  -3.699996  2.156029e-04
+FBgn0036862   261.055498       1.072164 0.38690210   2.771152  5.585842e-03
+FBgn0036985  1932.743234      -1.332705 0.14923574  -8.930199  4.252413e-19
+FBgn0037046    24.826604       1.610115 0.42597210   3.779861  1.569157e-04
+FBgn0037153   103.140156       1.802652 0.21841812   8.253214  1.541903e-16
+FBgn0037223    24.987728      -2.609952 0.47333494  -5.513965  3.508386e-08
+FBgn0037290    67.099817       3.082179 0.32145960   9.588075  8.974399e-22
+FBgn0037635   167.519024      -1.094014 0.17557346  -6.231087  4.632086e-10
+FBgn0037646    39.617565      -2.795744 0.39973543  -6.993986  2.671843e-12
+FBgn0037678    35.332088       1.609553 0.34992701   4.599683  4.231343e-06
+FBgn0037754   269.747254      -2.259098 0.17427452 -12.962869  1.986756e-38
+FBgn0038149   993.478130       1.013828 0.10955975   9.253654  2.169473e-20
+FBgn0038198    62.292342       2.393915 0.30803721   7.771514  7.755368e-15
+FBgn0038237    20.771723      -2.871559 0.56683459  -5.065956  4.063556e-07
+FBgn0038261    29.134289       1.409272 0.38020653   3.706597  2.100627e-04
+FBgn0038351    97.378275      -1.631934 0.25169774  -6.483706  8.949659e-11
+FBgn0038381   158.231817      -1.133082 0.19115634  -5.927512  3.075586e-09
+FBgn0038484    27.344199      -1.373249 0.42034915  -3.266924  1.087228e-03
+FBgn0038528   152.604420       1.383340 0.18814798   7.352405  1.946720e-13
+FBgn0038545    81.981587       1.113312 0.24068962   4.625508  3.736817e-06
+FBgn0038603    20.075688      -1.284551 0.45466122  -2.825293  4.723735e-03
+FBgn0038832   301.911362      -2.493696 0.17481851 -14.264487  3.642610e-46
+FBgn0038865   282.793771      -1.041186 0.15522268  -6.707692  1.977266e-11
+FBgn0039069    33.738021      -1.044051 0.35962876  -2.903136  3.694466e-03
+FBgn0039094    15.627549      -1.779108 0.53383686  -3.332682  8.601332e-04
+FBgn0039109   475.403847      -1.285320 0.12843682 -10.007407  1.414099e-23
+FBgn0039155   730.567673      -4.619789 0.16646736 -27.751921 1.651900e-169
+FBgn0039178    13.924886       2.174420 0.59563822   3.650571  2.616577e-04
+FBgn0039257   521.915451      -1.047435 0.12360452  -8.474084  2.369355e-17
+FBgn0039419  1564.280996      -1.166984 0.09856212 -11.840084  2.422094e-32
+FBgn0039464   820.539132       1.038940 0.11655847   8.913468  4.946056e-19
+FBgn0039479   175.681250       1.479494 0.17172392   8.615539  6.961340e-18
+FBgn0039485    58.570050       1.346978 0.27576274   4.884554  1.036634e-06
+FBgn0039593    42.495130       1.974771 0.33265214   5.936444  2.912703e-09
+FBgn0039640    72.022830      -1.804567 0.27040304  -6.673620  2.495690e-11
+FBgn0039651    74.229460       1.071960 0.24614541   4.354987  1.330751e-05
+FBgn0039759    14.250832       1.906141 0.56630412   3.365931  7.628569e-04
+FBgn0039788    17.220915       1.895075 0.50186291   3.776080  1.593157e-04
+FBgn0039808    38.261964      -1.015020 0.34944146  -2.904693  3.676132e-03
+FBgn0039827   261.911170      -4.184856 0.21618143 -19.358074  1.742791e-83
+FBgn0040091  1106.508951      -1.575478 0.11721898 -13.440465  3.502265e-41
+FBgn0040099   910.082576      -1.747685 0.13946565 -12.531292  5.033588e-36
+FBgn0040391    21.726859      -1.328589 0.45101203  -2.945796  3.221249e-03
+FBgn0040827   215.979868      -1.974609 0.17515337 -11.273600  1.771753e-29
+FBgn0041605    40.258075       1.027363 0.35611033   2.884958  3.914657e-03
+FBgn0043364  1194.937651      -1.148834 0.15852668  -7.246943  4.262844e-13
+FBgn0046258     9.759689       2.089417 0.66086080   3.161659  1.568731e-03
+FBgn0050088    14.411130      -1.512701 0.55081966  -2.746273  6.027657e-03
+FBgn0050148    57.124223      -1.084824 0.33463968  -3.241767  1.187913e-03
+FBgn0050359    45.747750       1.105637 0.31112273   3.553700  3.798519e-04
+FBgn0050463    42.094564       2.666256 0.35808538   7.445868  9.630926e-14
+FBgn0051092   153.068562       2.317284 0.18873410  12.278037  1.188475e-34
+FBgn0051125    27.119639       1.282300 0.38225513   3.354565  7.948987e-04
+FBgn0051163    12.172351       1.710251 0.56950426   3.003052  2.672866e-03
+FBgn0051462    90.414208       1.203721 0.29363912   4.099322  4.143619e-05
+FBgn0051477    43.270008       1.140473 0.31848407   3.580941  3.423591e-04
+FBgn0051642   110.540635       1.968425 0.23028632   8.547728  1.255357e-17
+FBgn0052135   240.709568       1.399095 0.15628231   8.952354  3.479806e-19
+FBgn0052185    23.634394       1.350984 0.41429292   3.260938  1.110442e-03
+FBgn0052313    12.530300      -1.849116 0.64164475  -2.881838  3.953633e-03
+FBgn0052407   187.050168      -2.170633 0.18419909 -11.784169  4.710434e-32
+FBgn0052625   155.800987       1.638044 0.21394019   7.656552  1.909907e-14
+FBgn0052677    46.144740       1.205822 0.29356225   4.107550  3.998786e-05
+FBgn0052681   160.546279      -1.001359 0.18286518  -5.475939  4.351965e-08
+FBgn0053307  1013.566614      -1.405935 0.15211670  -9.242477  2.408548e-20
+FBgn0053346    12.270366       1.879482 0.61568457   3.052670  2.268154e-03
+FBgn0053643    14.313171       1.716219 0.55548828   3.089568  2.004475e-03
+FBgn0054057    30.514118      -1.043595 0.37652989  -2.771613  5.577925e-03
+FBgn0062978    17.391813      -1.619430 0.50268302  -3.221573  1.274891e-03
+FBgn0063498   343.868523      -1.340157 0.14815410  -9.045697  1.487134e-19
+FBgn0063649   646.192411      -1.294640 0.12393627 -10.446011  1.528175e-25
+FBgn0063667    13.052170       2.734850 0.61273919   4.463318  8.070032e-06
+FBgn0085334    43.262130      -1.291483 0.39506766  -3.269017  1.079217e-03
+FBgn0085359    68.606108      -4.896951 0.47834997 -10.237171  1.351294e-24
+FBgn0086910    87.068407       1.735546 0.23562494   7.365712  1.762035e-13
+FBgn0087007   133.273160       1.108433 0.21999524   5.038442  4.693361e-07
+FBgn0250829    76.254559       1.200664 0.27997653   4.288444  1.799294e-05
+FBgn0250904    30.259138       1.778325 0.37027488   4.802715  1.565290e-06
+FBgn0259224   251.947326       1.110560 0.18505326   6.001297  1.957473e-09
+FBgn0259236     6.313933      -3.025432 1.02899738  -2.940175  3.280273e-03
+FBgn0259714   117.021360      -1.037996 0.23265303  -4.461564  8.136371e-06
+FBgn0259715   804.639165      -1.864273 0.30644492  -6.083551  1.175492e-09
+FBgn0259740    46.522220       1.397215 0.45618127   3.062850  2.192401e-03
+FBgn0259741    33.162321       1.351482 0.35543606   3.802321  1.433470e-04
+FBgn0259935    44.898315       1.148352 0.30388005   3.778965  1.574818e-04
+FBgn0260011    89.279354       2.299768 0.24437233   9.410917  4.918288e-21
+FBgn0260429    68.337032      -1.367145 0.36599093  -3.735463  1.873704e-04
+FBgn0261015   434.523396      -1.086081 0.15638211  -6.945045  3.783393e-12
+FBgn0261284    51.013851       2.307225 0.31070654   7.425736  1.121541e-13
+FBgn0261362  5796.451653       1.491167 0.14592473  10.218740  1.634508e-24
+FBgn0261546    28.121331      -1.868303 0.41726846  -4.477460  7.553648e-06
+FBgn0261552  5128.615894      -1.868729 0.14661683 -12.745665  3.295704e-37
+                     padj         symbol   entrez
+FBgn0000071  7.410047e-59            Ama    40831
+FBgn0000078  2.260440e-02          Amy-d    36932
+FBgn0000079  3.670556e-10          Amy-p    47764
+FBgn0000116  1.241886e-14           Argk    39041
+FBgn0000406  1.941966e-18       Cyt-b5-r    35008
+FBgn0000567  9.890123e-12        Eip74EF    39962
+FBgn0001137  1.424935e-15            grk    34171
+FBgn0001224  2.086858e-25          Hsp23    39077
+FBgn0001225  4.839321e-20          Hsp26    39075
+FBgn0001226  2.921328e-34          Hsp27    39078
+FBgn0001967  5.557617e-03          NimC3    48772
+FBgn0002609  3.236968e-04   E(spl)m3-HLH    43156
+FBgn0002773  5.138963e-03           Mlc2    43587
+FBgn0002868  2.708646e-15           MtnA    41202
+FBgn0002945  1.464290e-02            nkd    44843
+FBgn0003360 3.816242e-176           sesB    32007
+FBgn0003366  3.313918e-03            sev    32039
+FBgn0003447  1.290854e-06             sn    31717
+FBgn0003501  1.658938e-32           &lt;NA&gt;     &lt;NA&gt;
+FBgn0003748  7.037482e-25           Treh    45368
+FBgn0004396  2.785323e-11          CrebA    39682
+FBgn0010223  2.979382e-06        Galphaf    39861
+FBgn0011260  2.691955e-23         Sema2a    36846
+FBgn0015568  8.366257e-09     alpha-Est1    40909
+FBgn0016715  1.494380e-21          Reg-2    38075
+FBgn0020248  1.046742e-07           stet    38169
+FBgn0020376  4.831643e-04        Sr-CIII    44382
+FBgn0023479  5.089366e-32            teq    39048
+FBgn0023549  2.095094e-15           Mct1    31198
+FBgn0024288  1.037279e-20        Sox100B    45039
+FBgn0024315  1.041180e-18          Picot    36865
+FBgn0024836  3.991474e-02           stan    36125
+FBgn0024977  4.712631e-02           &lt;NA&gt;     &lt;NA&gt;
+FBgn0024984  2.872052e-11         CG3457    31196
+FBgn0025111 2.400236e-160           Ant2    32008
+FBgn0025836  1.739375e-04       RhoGAP1A  5740235
+FBgn0026415  1.686043e-03          Idgf4    31926
+FBgn0026562 1.340860e-169          SPARC    43230
+FBgn0027279  2.427659e-34      l(1)G0196    33137
+FBgn0027348  4.483724e-08            bgm    44117
+FBgn0028373  4.430948e-03           &lt;NA&gt;     &lt;NA&gt;
+FBgn0028433  1.905527e-07           &lt;NA&gt;     &lt;NA&gt;
+FBgn0028434  3.336399e-04          Ercc1    36654
+FBgn0028542  2.378130e-10          NimB4    34814
+FBgn0028939  5.409193e-05          NimC2    34818
+FBgn0029002  2.913441e-04         miple2    44787
+FBgn0029090  3.879265e-05           &lt;NA&gt;     &lt;NA&gt;
+FBgn0029167 6.907049e-111            Hml    39529
+FBgn0029896  9.338828e-59         CG3168    31612
+FBgn0030041  3.153436e-16        CG12116    31782
+FBgn0030051  2.883118e-02         spirit    31797
+FBgn0030326  1.158683e-06         CG2444    32121
+FBgn0030598  2.933988e-08         CG9503    32424
+FBgn0030634  7.309438e-03         CG9164    32467
+FBgn0030805  4.311070e-12            wus    32683
+FBgn0030954  2.305147e-02     CCKLR-17D3    32864
+FBgn0031150  1.896527e-27           bves    33083
+FBgn0031258  1.718424e-06         CG4297    33222
+FBgn0031322  5.759639e-20         CG5001    33308
+FBgn0031327  8.592412e-16         CG5397    33313
+FBgn0031464  3.818439e-02           &lt;NA&gt;     &lt;NA&gt;
+FBgn0031547  3.031318e-09         Sr-CIV    33576
+FBgn0031548  1.706212e-07         CG8852    33577
+FBgn0031688  3.214663e-04        Cyp28d2    33748
+FBgn0031689  5.780724e-10        Cyp28d1    33749
+FBgn0031703  9.193382e-11        CG12512    33766
+FBgn0031912  1.535419e-24           &lt;NA&gt;     &lt;NA&gt;
+FBgn0032004  1.341834e-15         CG8292    34125
+FBgn0032405  1.333073e-22           firl    34627
+FBgn0032436  3.277186e-04         CG5418    34663
+FBgn0032498  3.541893e-03           &lt;NA&gt;     &lt;NA&gt;
+FBgn0032598  2.443456e-12          ChLD3    35002
+FBgn0032638  4.616604e-09          SPH93    35049
+FBgn0032808  3.344251e-02           &lt;NA&gt;     &lt;NA&gt;
+FBgn0033065  6.317918e-10         Cyp6w1    35543
+FBgn0033113  7.025238e-07        Spn42Dc    35600
+FBgn0033363  1.366933e-03        CG13744    35906
+FBgn0033367  2.074364e-16           PPO2    35910
+FBgn0033368  8.337381e-05        CG13743    35911
+FBgn0033446  1.820608e-04         CG1648    36009
+FBgn0033458  8.848312e-03           Lime    36023
+FBgn0033495  6.686306e-07           &lt;NA&gt;     &lt;NA&gt;
+FBgn0033541  4.543153e-02        CG12934    36124
+FBgn0033635  3.486557e-15           Prip    36237
+FBgn0033724  6.052187e-10         CG8501    36347
+FBgn0033764  2.159582e-25           &lt;NA&gt;     &lt;NA&gt;
+FBgn0033775  1.928853e-08         Cyp9h1    36412
+FBgn0033782  3.611984e-10            sug    36424
+FBgn0033857  9.521576e-03           &lt;NA&gt;     &lt;NA&gt;
+FBgn0033913  6.985360e-29         CG8468    36577
+FBgn0034010  9.819828e-26         CG8157    36700
+FBgn0034139  1.168340e-02         CG4927    36852
+FBgn0034160  4.579451e-02         CG5550    36883
+FBgn0034225  4.816418e-04           veil    36968
+FBgn0034290  2.219679e-02         CG5773    37053
+FBgn0034389  1.620512e-12           Mctp    37165
+FBgn0034391  4.023090e-07        CG15080    37167
+FBgn0034403  1.815000e-03        CG18190    37179
+FBgn0034434  5.023286e-37           &lt;NA&gt;     &lt;NA&gt;
+FBgn0034438  9.890123e-12         CG9416    37223
+FBgn0034636  2.803562e-03            twz    37456
+FBgn0034718  1.253838e-10            wdp    37548
+FBgn0034736  9.309627e-64            gas    37572
+FBgn0034751  2.691955e-23           &lt;NA&gt;     &lt;NA&gt;
+FBgn0034804  8.762769e-04         CG3831    37648
+FBgn0034885  1.155967e-13          Eglp4    37739
+FBgn0034897  4.176715e-40           Sesn    37755
+FBgn0034898  2.584270e-02        CG18128    37756
+FBgn0035076  5.680731e-03         Ance-5    37980
+FBgn0035085  1.022832e-85         CG3770    37991
+FBgn0035147  9.019244e-25           Gale    38076
+FBgn0035189  3.905225e-38         CG9119    38124
+FBgn0035266  1.815727e-09            Gk2    38221
+FBgn0035344  1.468911e-09        Cyp4d20    38311
+FBgn0035523  1.429653e-04           Ctl1    38523
+FBgn0035539  5.493266e-03           slow    38540
+FBgn0035710  4.171582e-04         SP1173    38744
+FBgn0035727  5.119617e-08        CG10063    38764
+FBgn0035765  5.421561e-15           &lt;NA&gt;     &lt;NA&gt;
+FBgn0035789  7.977409e-03          mthl6    38839
+FBgn0035932  3.131380e-03        CG13308    39011
+FBgn0035957  2.257960e-02         CG5144    39040
+FBgn0035968  1.572709e-12        Slc45-1    39055
+FBgn0035969  3.276905e-02         CG4476    39056
+FBgn0036181  3.169862e-03        Muc68Ca  2768980
+FBgn0036287  4.049862e-02        CG10663    39421
+FBgn0036373  3.220829e-12            Tgi    39521
+FBgn0036560  1.593693e-04         CG5895    39752
+FBgn0036576  2.337377e-11         CG5151    39772
+FBgn0036801  3.048489e-02       MYPT-75D    40032
+FBgn0036821  3.117335e-03         CG3961    40056
+FBgn0036862  4.557894e-02        Gbs-76A    40102
+FBgn0036985  6.179693e-17            zye    40255
+FBgn0037046  2.377024e-03        CG10581    40326
+FBgn0037153  1.632133e-14         olf413    40453
+FBgn0037223  1.161425e-06           &lt;NA&gt;     &lt;NA&gt;
+FBgn0037290  1.603052e-19         CG1124    40613
+FBgn0037635  2.016015e-08         CG9837    41057
+FBgn0037646  1.789717e-10        CAHbeta    41070
+FBgn0037678  1.021959e-04        CG16749    41111
+FBgn0037754  1.064653e-35         CG8500    41203
+FBgn0038149  3.444641e-18          GILT1    41650
+FBgn0038198  7.307091e-13          Npc2b    41710
+FBgn0038237  1.161364e-05           Pde6    41760
+FBgn0038261  3.057857e-03        CG14856    41790
+FBgn0038351  4.384822e-09           &lt;NA&gt;     &lt;NA&gt;
+FBgn0038381  1.172003e-07          EndoU    41931
+FBgn0038484  1.204379e-02         CG5246    42072
+FBgn0038528  1.503709e-11        CG14326    42120
+FBgn0038545  9.102122e-05          pasi1    42139
+FBgn0038603  3.994211e-02            PKD    42203
+FBgn0038832  2.839249e-43        CG15695    42468
+FBgn0038865  1.108379e-09           cDIP    42512
+FBgn0039069  3.287646e-02         CG6763    42754
+FBgn0039094  1.002008e-02        CG10184    42783
+FBgn0039109  2.755564e-21        CG10365    42801
+FBgn0039155 4.721130e-166           Kal1    42865
+FBgn0039178  3.641969e-03         CG6356    42893
+FBgn0039257  2.708646e-15            tnc    42990
+FBgn0039419  8.652931e-30        CG12290    43182
+FBgn0039464  7.067915e-17         CG6330    43240
+FBgn0039479  8.777431e-16        CG14257    43257
+FBgn0039485  2.821618e-05        CG17189    43263
+FBgn0039593  1.119889e-07            Sid    43390
+FBgn0039640  1.362933e-09        CG14516    43444
+FBgn0039651  2.762678e-04        Cyt-c1L    43457
+FBgn0039759  9.009277e-03         CG9733    43601
+FBgn0039788  2.400655e-03          Rpt6R    43635
+FBgn0039808  3.281687e-02        CG12071    43660
+FBgn0039827  2.134670e-80         CG1544    43689
+FBgn0040091  2.309879e-38       Ugt317A1    37590
+FBgn0040099  2.157899e-33     lectin-28C    53542
+FBgn0040391  2.947598e-02         CG2854    31219
+FBgn0040827  5.425361e-27        CG13315    50300
+FBgn0041605  3.443645e-02            cpx    64877
+FBgn0043364  3.123899e-11            cbt    33224
+FBgn0046258  1.624433e-02        CG12880    43328
+FBgn0050088  4.833967e-02        CG30088   246447
+FBgn0050148  1.292534e-02        CG30148    37318
+FBgn0050359  4.979893e-03         Mal-A5    35828
+FBgn0050463  7.939957e-12         Pgant9   246627
+FBgn0051092  4.631809e-32           LpR2    43105
+FBgn0051125  9.323477e-03        CG31125   318599
+FBgn0051163  2.532282e-02           SKIP    42601
+FBgn0051462  7.401539e-04           &lt;NA&gt;     &lt;NA&gt;
+FBgn0051477  4.564559e-03 ATPsynepsilonL   326144
+FBgn0051642  1.515976e-15        CG31642   326149
+FBgn0052135  5.144113e-17           &lt;NA&gt;     &lt;NA&gt;
+FBgn0052185  1.225345e-02           edin   317900
+FBgn0052313  3.459025e-02        CG32313   317973
+FBgn0052407  1.615490e-29        CG32407    38667
+FBgn0052625  1.688200e-12        CG32625   318128
+FBgn0052677  7.202855e-04       X11Lbeta    31997
+FBgn0052681  1.408066e-06        CG32681   318151
+FBgn0053307  3.754708e-18        CG33307  2768914
+FBgn0053346  2.215196e-02        CG33346  2768690
+FBgn0053643  2.003073e-02        CG33643  3772011
+FBgn0054057  4.557894e-02        CG34057  3885645
+FBgn0062978  1.374477e-02        CG31808 10178782
+FBgn0063498  2.236962e-17          GstE2    37107
+FBgn0063649  3.448046e-23         CG6006    41962
+FBgn0063667  1.797206e-04        CG32335   261663
+FBgn0085334  1.198601e-02        CG34305  5740825
+FBgn0085359  2.896498e-22        CG34330  2768869
+FBgn0086910  1.373426e-11           &lt;NA&gt;     &lt;NA&gt;
+FBgn0087007  1.328082e-05            bbg    39583
+FBgn0250829  3.571098e-04           &lt;NA&gt;     &lt;NA&gt;
+FBgn0250904  4.079269e-05        CG34434    31472
+FBgn0259224  7.847143e-08        CG42324    38430
+FBgn0259236  2.998407e-02          comm3    39696
+FBgn0259714  1.807286e-04    DIP-epsilon  7354433
+FBgn0259715  4.868921e-08        CG42369    33894
+FBgn0259740  2.150761e-02        CG42394  7354424
+FBgn0259741  2.190833e-03        CG42395  7354436
+FBgn0259935  2.380473e-03        CG42458  2768945
+FBgn0260011  8.268510e-19          NimC4    34824
+FBgn0260429  2.774636e-03        CG42524  8674084
+FBgn0261015  2.457486e-10          Pif1A  8674049
+FBgn0261284  9.071785e-12            bou    31644
+FBgn0261362  3.418116e-22           &lt;NA&gt;     &lt;NA&gt;
+FBgn0261546  1.695418e-04           &lt;NA&gt;     &lt;NA&gt;
+FBgn0261552  1.662198e-34             ps    44258</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(res_lfc_new)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div id="htmlwidget-5d87b78b937c6dd6b947" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5d87b78b937c6dd6b947">{"x":{"filter":"none","vertical":false,"data":[["FBgn0000071","FBgn0000078","FBgn0000079","FBgn0000116","FBgn0000406","FBgn0000567","FBgn0001137","FBgn0001224","FBgn0001225","FBgn0001226","FBgn0001967","FBgn0002609","FBgn0002773","FBgn0002868","FBgn0002945","FBgn0003360","FBgn0003366","FBgn0003447","FBgn0003501","FBgn0003748","FBgn0004396","FBgn0010223","FBgn0011260","FBgn0015568","FBgn0016715","FBgn0020248","FBgn0020376","FBgn0023479","FBgn0023549","FBgn0024288","FBgn0024315","FBgn0024836","FBgn0024977","FBgn0024984","FBgn0025111","FBgn0025836","FBgn0026415","FBgn0026562","FBgn0027279","FBgn0027348","FBgn0028373","FBgn0028433","FBgn0028434","FBgn0028542","FBgn0028939","FBgn0029002","FBgn0029090","FBgn0029167","FBgn0029896","FBgn0030041","FBgn0030051","FBgn0030326","FBgn0030598","FBgn0030634","FBgn0030805","FBgn0030954","FBgn0031150","FBgn0031258","FBgn0031322","FBgn0031327","FBgn0031464","FBgn0031547","FBgn0031548","FBgn0031688","FBgn0031689","FBgn0031703","FBgn0031912","FBgn0032004","FBgn0032405","FBgn0032436","FBgn0032498","FBgn0032598","FBgn0032638","FBgn0032808","FBgn0033065","FBgn0033113","FBgn0033363","FBgn0033367","FBgn0033368","FBgn0033446","FBgn0033458","FBgn0033495","FBgn0033541","FBgn0033635","FBgn0033724","FBgn0033764","FBgn0033775","FBgn0033782","FBgn0033857","FBgn0033913","FBgn0034010","FBgn0034139","FBgn0034160","FBgn0034225","FBgn0034290","FBgn0034389","FBgn0034391","FBgn0034403","FBgn0034434","FBgn0034438","FBgn0034636","FBgn0034718","FBgn0034736","FBgn0034751","FBgn0034804","FBgn0034885","FBgn0034897","FBgn0034898","FBgn0035076","FBgn0035085","FBgn0035147","FBgn0035189","FBgn0035266","FBgn0035344","FBgn0035523","FBgn0035539","FBgn0035710","FBgn0035727","FBgn0035765","FBgn0035789","FBgn0035932","FBgn0035957","FBgn0035968","FBgn0035969","FBgn0036181","FBgn0036287","FBgn0036373","FBgn0036560","FBgn0036576","FBgn0036801","FBgn0036821","FBgn0036862","FBgn0036985","FBgn0037046","FBgn0037153","FBgn0037223","FBgn0037290","FBgn0037635","FBgn0037646","FBgn0037678","FBgn0037754","FBgn0038149","FBgn0038198","FBgn0038237","FBgn0038261","FBgn0038351","FBgn0038381","FBgn0038484","FBgn0038528","FBgn0038545","FBgn0038603","FBgn0038832","FBgn0038865","FBgn0039069","FBgn0039094","FBgn0039109","FBgn0039155","FBgn0039178","FBgn0039257","FBgn0039419","FBgn0039464","FBgn0039479","FBgn0039485","FBgn0039593","FBgn0039640","FBgn0039651","FBgn0039759","FBgn0039788","FBgn0039808","FBgn0039827","FBgn0040091","FBgn0040099","FBgn0040391","FBgn0040827","FBgn0041605","FBgn0043364","FBgn0046258","FBgn0050088","FBgn0050148","FBgn0050359","FBgn0050463","FBgn0051092","FBgn0051125","FBgn0051163","FBgn0051462","FBgn0051477","FBgn0051642","FBgn0052135","FBgn0052185","FBgn0052313","FBgn0052407","FBgn0052625","FBgn0052677","FBgn0052681","FBgn0053307","FBgn0053346","FBgn0053643","FBgn0054057","FBgn0062978","FBgn0063498","FBgn0063649","FBgn0063667","FBgn0085334","FBgn0085359","FBgn0086910","FBgn0087007","FBgn0250829","FBgn0250904","FBgn0259224","FBgn0259236","FBgn0259714","FBgn0259715","FBgn0259740","FBgn0259741","FBgn0259935","FBgn0260011","FBgn0260429","FBgn0261015","FBgn0261284","FBgn0261362","FBgn0261546","FBgn0261552"],[342.246487725455,29.0159476197304,159.517803392293,658.401186017792,265.504534086402,261.174489927451,494.04936828311,598.932007347051,420.302629286048,1323.90943619999,14.3462419633866,43.2551136137613,41.1047663249845,100.129906548607,55.48841088399,4342.8320615483,17.7120740521515,36.3051835360252,277.460809952997,1095.97418687562,2423.4177628592,65.4037505036009,211.129678246791,210.367106107003,150.872486038183,35.6263967825634,40.8130277420041,3091.78196454293,216.537978330365,58.8494875253442,92.0840267409837,16.4566488876465,28.443748917727,120.72437320106,1501.4479295742,93.7244693947194,46.9558100716458,43909.4443835314,2954.90726348927,172.975837264644,42.0609200090626,92.7233225298929,83.6654680040866,1164.01227304999,20.0277226360595,1587.74346320704,43.5366755871157,3706.02400785474,489.877246619059,86.8708892913224,32.90043594538,140.61710360818,37.9502625019135,8.035542593361,340.916155958115,17.0091428165611,795.375914895633,107.568117135677,396.807063925681,756.387956217435,29.1644059228605,265.28710570863,53.6644499065255,30.8038354303719,274.174934431934,90.8193992261229,1318.33225228138,961.575715718715,79.6159906120173,17.2796257212951,57.3565674133406,315.324408370831,131.934790702139,28.344772816723,29.9482901809733,373.890809050359,70.2294434729282,15324.9710040484,63.8160509395739,81.54457073364,41.1104671066625,66.4276945513304,22.7480713547379,2490.12064966662,152.834926132809,65.2059280189589,46.8809721686594,162.226101633926,17.5401051662992,5212.96176538917,547.240149120962,28.9000637902582,42.0373719992831,49.100787811625,13.5368226966942,110.747440038619,65.1274308024795,68.0353080384092,114.623344446462,74.5954977692353,15.1659174890807,496.04391902447,225.870671605661,16640.8459837339,39.021954820101,160.525286659183,892.485155473449,6.68186364603847,30.8126152894526,638.219335651327,19322.7013020077,215.654948171641,383.49566591085,77.3889343639722,47.9047895792265,20.4818430733033,17.3496883088748,65.2390054012443,556.565720032329,13.6150910959808,27.3932665883248,14.2090124459709,295.082687909235,12.9148030214194,89.4526680649813,14.1818722989093,3859.03951894242,18.8949531546659,1775.62783509235,33.9254902851723,416.309296705106,261.055497817731,1932.74323423911,24.8266044951045,103.140156366507,24.9877279331403,67.0998167313376,167.519023619718,39.6175652978946,35.3320883204162,269.747253760138,993.47812985692,62.2923420739071,20.7717228830904,29.1342891179027,97.3782746279397,158.231816828124,27.3441989271922,152.60441974042,81.9815873557935,20.075687668467,301.911362068779,282.793771098766,33.7380206190465,15.627548563531,475.403846877735,730.567672556595,13.9248858729795,521.915451167556,1564.28099570834,820.539132138972,175.681250169556,58.5700497791369,42.4951299978344,72.0228298705173,74.2294603344455,14.2508316554665,17.2209151090385,38.2619635193833,261.911169759448,1106.50895128494,910.08257602036,21.726859188949,215.979868086714,40.2580752965441,1194.93765071583,9.75968862871394,14.4111299865994,57.124222972352,45.7477496998988,42.0945642373631,153.068561614784,27.1196387196084,12.1723509831174,90.4142083486468,43.2700083831999,110.54063539156,240.709567638936,23.6343938829458,12.5303002914293,187.050167913661,155.80098746963,46.1447404602111,160.546278938595,1013.56661385984,12.2703655715405,14.3131705367409,30.5141184791153,17.3918126747688,343.868523446746,646.192411101866,13.0521699727757,43.2621295875823,68.6061082175759,87.0684066671532,133.273160266023,76.2545590006507,30.2591383074778,251.947326325558,6.31393317037846,117.021360483194,804.639164765266,46.5222203495388,33.1623213343193,44.8983152304953,89.2793535054463,68.3370323094981,434.523396271828,51.0138514919771,5796.45165295305,28.1213312285079,5128.6158935707],[2.62144935566491,-1.14501695430644,-1.2674098238261,1.19422563140812,-2.07542043020377,-1.22965264298093,-1.22842363076624,1.46821077964139,1.30749131977333,1.66579284946529,-1.98133960079511,-1.46435789196936,-1.20518989722174,-2.04432432936056,-1.03115306661152,-3.12666665609594,-1.89344876799415,1.95400795141459,2.13237206335522,1.10011258911794,1.1134045237883,-1.40409397886532,2.15957715662833,1.06183448335038,-2.00754815661109,2.08899117295138,-1.48856548087101,-1.53218678343173,-1.61771847045338,-4.62135607415508,-2.29394773738732,1.43279825895802,1.03797838802377,1.438534504972,2.85211110513182,-1.04248164123098,1.1432424021751,-2.47776427863145,-1.18260015023724,-1.22687573041698,1.26355664341467,-1.31542019867536,1.02286670050077,-1.05461015846372,-2.44509594143889,1.42278919730895,-1.52699965896887,-2.1970228571432,-2.44290318953614,-2.83494563290541,1.02677699351213,-1.2601317246253,2.1570500748155,-3.20128460589783,1.00062156811489,1.4528082267175,1.2425282147863,-1.30936705624077,-1.48917123314998,1.19517940603363,-1.08459617432371,-1.35408734961225,-1.89492062971288,1.66162437774143,1.00267651053584,-1.85946688485566,-1.11930208028039,-1.14706202362392,2.65454715371732,2.32844752857803,1.06636450700898,1.05305792199133,-1.38668102055061,-1.17476173318497,2.96957734353858,1.04761808587662,-1.00805297479342,1.37999201896334,1.31468870232389,-1.0931364325351,1.14273902288232,-2.02345379349732,1.13677990453948,1.18569618711508,1.40117632985879,3.41717552365792,1.93850360435856,-1.43067641449812,1.80149756690393,-1.16949417312007,-1.46291456944082,1.21063230569018,-1.01605203884835,-1.31402338316681,-1.83804752125488,-1.91506295082325,1.51983852752286,1.06102765814907,-3.65188054254781,1.91367550484461,-2.36675028396253,1.34895524425252,-3.53495293105837,-1.08431052543867,-1.47570785644026,1.56631246692317,-1.93388649654442,-2.77022667865249,1.3114531164104,-2.58312818614388,-1.17666381496019,2.89094853309672,1.00689615438268,-1.65921659580352,1.60925772366893,1.76266088280413,2.32561805807725,1.56475307975694,1.02855321782975,-2.5932162424813,1.50042062365891,1.74201913540907,1.09844667239749,1.70624074657628,-1.0127749936644,1.66267700823862,-1.06771481651447,2.26569350641701,-1.10564353683322,-1.05752430303921,-1.74903445308743,1.07216434914196,-1.33270490893099,1.61011544621266,1.80265154513008,-2.60995223829902,3.08217867091789,-1.09401355679272,-2.79574395967225,1.60955331054492,-2.25909779712478,1.01382795502769,2.39391537571597,-2.87155915084452,1.40927243862408,-1.63193415265173,-1.13308154409601,-1.3732487751445,1.3833401108224,1.11331172029282,-1.28455133548593,-2.49369632157339,-1.04118591532397,-1.04405104705798,-1.77910826548052,-1.28531956826896,-4.61978906928183,2.17441979602392,-1.0474351231843,-1.16698382338491,1.03894022637995,1.47949406552964,1.34697792402423,1.97477081884836,-1.80456720466175,1.07195993819758,1.9061407746145,1.8950746369695,-1.01502025486328,-4.1848561459937,-1.57547761799752,-1.74768484599517,-1.32858936880275,-1.97460891807196,1.02736340731909,-1.14883377939173,2.0894165184901,-1.51270118714549,-1.08482372232659,1.10563693737662,2.66625636887581,2.31728419897246,1.28229967765935,1.71025104548105,1.20372135080345,1.14047261818986,1.96842467409999,1.39909460978054,1.35098363107967,-1.84911606462849,-2.17063319136058,1.63804427546305,1.20582156843179,-1.00135866164269,-1.40593515585827,1.87948166341236,1.71621909073618,-1.0435952719003,-1.61942990618212,-1.34015709288962,-1.29463974793089,2.73484958449767,-1.29148308021932,-4.89695065377064,1.73554553102418,1.10843330088809,1.20066359582718,1.77832452793955,1.11055960205708,-3.0254320295889,-1.03799634081773,-1.8642734173464,1.39721468559686,1.35148185871162,1.14835195810653,2.29976758117281,-1.36714543814068,-1.08608079777222,2.30722488247242,1.49116696984791,-1.86830269215088,-1.86872895974749],[0.157981395703166,0.376028759374252,0.184194419695086,0.144103573597402,0.222764047437841,0.165886864751544,0.143565951501735,0.134219843524878,0.134581450621955,0.131238077578343,0.563402488052751,0.33941573723242,0.340121108099814,0.24121667462734,0.322384856436554,0.109269080745043,0.514557247837783,0.35579331252669,0.172458074882153,0.101655389913463,0.153260136420748,0.263121490848304,0.206173171252189,0.166443053144263,0.199358455621803,0.351073945547538,0.353747183379701,0.124905051918807,0.190161575389267,0.468074233428786,0.244437032316555,0.507036418059598,0.376517158336688,0.198159314591089,0.104609098358856,0.233171784807184,0.294468890919974,0.0883064271341897,0.0930329784028638,0.201208965730702,0.35179557570127,0.225108399626727,0.237567601135731,0.151726088932886,0.515662707264745,0.327819175497064,0.317240913964745,0.0967652140406412,0.147401040440381,0.32433919187043,0.347360327520132,0.228489171367704,0.349622481528805,0.932795948719653,0.132886632294799,0.478435832939038,0.109291676957692,0.2408441159083,0.153597317909437,0.138657116386215,0.381560863568815,0.206936849845358,0.323182470812219,0.384956265395038,0.147219556829119,0.262096669380211,0.104171225477662,0.133922834340427,0.257362331864775,0.540170418909829,0.291404906216785,0.138446159611535,0.214185101606452,0.405468262616291,0.436961235514999,0.186778555854678,0.255817805651078,0.157001583544813,0.282970800820836,0.245128880525246,0.338924640410725,0.360141102458716,0.409890290541027,0.140433863141938,0.205959770456353,0.312570474376987,0.310717236580502,0.207821936335752,0.5380838519643,0.100327102207594,0.132839626162507,0.369186789749647,0.366948276330037,0.312134266004859,0.60230554348047,0.249905811664595,0.266012608748334,0.274986617319557,0.276660243691908,0.258192402951486,0.63410651470379,0.191422215127145,0.20475119458336,0.103543829818166,0.363727985913044,0.19550624329186,0.140748408160615,0.925307606617926,0.373619422954941,0.129240918382656,0.108985882059896,0.215806012838373,0.15196415692131,0.249102915682389,0.356081289450525,0.500555703830809,0.547701422137639,0.257584095974868,0.122595398878901,0.761580246852268,0.405691540870431,0.571928969109684,0.143244660113858,0.587087997650618,0.274132609667273,0.58968665269815,0.141061237919948,0.504198321974425,0.15162361780694,0.360472391699035,0.472712535215823,0.38690209648345,0.149235737700532,0.425972096465988,0.218418121140833,0.473334939439531,0.321459602300154,0.175573457373854,0.399735425259903,0.349927005635479,0.174274523183455,0.10955974803118,0.30803720662934,0.566834593580085,0.380206532797056,0.251697744224763,0.191156342242472,0.420349146471706,0.188147976265332,0.240689620042402,0.454661223650297,0.174818507832282,0.155222676119166,0.359628757088706,0.533836859251181,0.128436819801663,0.166467360709367,0.59563822142855,0.123604517601947,0.0985621212331464,0.116558470229177,0.171723915106622,0.27576274091169,0.33265214300746,0.270403042898132,0.246145408922327,0.56630411511932,0.501862913264731,0.349441464532836,0.21618142660635,0.117218977132138,0.139465654318034,0.451012031844725,0.175153365998661,0.356110330565071,0.158526682988533,0.660860796436108,0.550819659207491,0.334639684771744,0.31112273482481,0.358085378731037,0.188734099825502,0.382255128429304,0.569504264401759,0.293639117267654,0.318484067906773,0.230286315519007,0.156282313062298,0.414292915382862,0.641644753509053,0.184199089742156,0.213940187336484,0.293562252776066,0.182865181945757,0.152116699424055,0.615684565232891,0.555488280603118,0.376529891657299,0.502683021923958,0.148154099291927,0.123936274572261,0.612739190363545,0.395067664797987,0.478349974322431,0.235624943358,0.219995240406458,0.279976529714102,0.370274876286861,0.185053258933513,1.02899738382945,0.232653030385009,0.306444916786802,0.456181273526282,0.355436056358373,0.303880053105324,0.244372325525986,0.365990931708527,0.156382107742368,0.310706539001826,0.145924732796168,0.417268455517766,0.146616832085609],[16.5934054702897,-3.04502495025078,-6.88082638944308,8.28727283852487,-9.31667589126064,-7.41259800661512,-8.5565109130447,10.9388503300501,9.71524168992746,12.6929080355577,-3.51673917458739,-4.31434883930152,-3.54341400319105,-8.47505394276279,-3.19851582983537,-28.6143768646811,-3.67976308943387,5.49197492650457,12.3645823184119,10.8219799270304,7.26480185774889,-5.33629531490766,10.4745789353298,6.37956624377732,-10.0700426794014,5.95028824965455,-4.20799246130881,-12.2668119495095,-8.50707335139529,-9.87312640625878,-9.38461621648466,2.82582908825615,2.7567890733298,7.25948466233082,27.2644650405819,-4.47087387564081,3.8823877069099,-28.0587082848031,-12.7116230237861,-6.09752018734112,3.59173545857104,-5.84349673693464,4.3055816349148,-6.95075030194847,-4.74165749625087,4.34016465068467,-4.81337555072914,-22.7046762509145,-16.5731746684937,-8.74068168128735,2.95594203529942,-5.51506102929226,6.16965495291751,-3.43192378814668,7.52988882956328,3.03657904925909,11.3689189275346,-5.43657482061678,-9.69529451046802,8.61967591122106,-2.84252468709517,-6.54348102150075,-5.8633150026689,4.316397801803,6.81075620747632,-7.09458418244231,-10.7448297276718,-8.56509667879442,10.3144354283831,4.31057948948277,3.65939105436915,7.60626314912668,-6.47421790848241,-2.89729638912993,6.79597433863593,5.60887774874818,-3.94051138163679,8.78966942756631,4.64602248186127,-4.45943550263355,3.37166109108354,-5.61850280260436,2.77337602468946,8.44309314425597,6.80315542571323,10.9324962009576,6.23880292478182,-6.88414533962744,3.34798667591953,-11.6568120416773,-11.0126369043766,3.27918641539459,-2.76892440812151,-4.20980176250933,-3.05168621001489,-7.66313891648707,5.71340785188395,3.85847016299005,-13.1998746687095,7.41181956931623,-3.73241754986244,7.04701511972645,-17.2646266521253,-10.471995553408,-4.05717435444479,8.01157262576475,-13.7400239321895,-2.99384405665689,3.51013099382834,-19.9869222415749,-10.7964792569512,13.3960518294821,6.62587925193487,-6.6607674633526,4.519354909527,3.52140804572656,4.2461420841314,6.0747270666494,8.38981908975027,-3.40504661616352,3.69842718544165,3.04586623426482,7.6683254476948,2.90627768478361,-3.69447106235792,2.81959410244565,-7.56915813485486,4.49365538850789,-7.29202714474876,-2.9337178862845,-3.69999592308015,2.77115156233801,-8.93019949152724,3.7798613091579,8.25321422835496,-5.51396489215316,9.5880746721014,-6.23108739302892,-6.99398597923738,4.59968303281398,-12.9628689027981,9.25365358397098,7.77151371391494,-5.06595607143164,3.70659711777311,-6.48370591352793,-5.92751216519278,-3.26692414311096,7.35240494360446,4.62550782246735,-2.82529335836642,-14.2644869384528,-6.70769208053491,-2.90313559880433,-3.33268157612065,-10.007407301534,-27.7519211549672,3.65057129948594,-8.47408447122814,-11.8400842918593,8.91346827336695,8.61553887011618,4.88455372749426,5.93644400121623,-6.67362018311891,4.3549865215477,3.36593134982408,3.77608025395145,-2.90469322586042,-19.3580744270598,-13.4404654992129,-12.5312920556755,-2.94579584355781,-11.2735996069128,2.88495816925301,-7.24694264545249,3.16165905098004,-2.74627305300238,-3.24176650795779,3.5537002398722,7.44586773781255,12.2780366723075,3.35456500722005,3.00305221994712,4.0993221952314,3.58094087935257,8.54772750896493,8.9523541235458,3.26093829007715,-2.88183773733981,-11.7841689359,7.65655249654772,4.10754978553597,-5.47593943793916,-9.24247739519345,3.05266977531167,3.08956849435744,-2.771613343384,-3.22157271193275,-9.04569700936143,-10.4460114877509,4.46331755420287,-3.26901742484974,-10.2371713528511,7.36571224714208,5.03844219011365,4.28844373867067,4.80271452865693,6.00129718577985,-2.94017465654738,-4.46156381070982,-6.08355144831266,3.06284971935912,3.80232065524879,3.778964582807,9.41091662577911,-3.73546260219766,-6.94504514264178,7.42573648396521,10.2187404511531,-4.47745969637846,-12.7456645540967],[7.77821632629075e-62,0.00232661007847206,5.95063372725946e-12,1.15874622582648e-16,1.20042235941152e-20,1.23848865691312e-13,1.16334829842535e-17,7.51467640015488e-28,2.5963233723551e-22,6.47366896275328e-37,0.000436882855898548,1.6007401635977e-05,0.000394982106721358,2.34970634478606e-17,0.00138136949006261,4.4509466840057e-180,0.000233450733535679,3.97463831287198e-08,4.06317843781705e-35,2.70861808232485e-27,3.73585475736108e-13,9.48648500572699e-08,1.13039519052432e-25,1.7759025542969e-10,7.49455557856316e-24,2.67670663457948e-09,2.57649460115358e-05,1.36523697797351e-34,1.78378690204666e-17,5.44407971394139e-23,6.31459848194367e-21,0.00471584187430859,0.00583719916458102,3.88567848103201e-13,1.11977397682652e-163,7.7900631211995e-06,0.000103435786044083,3.12773537416913e-173,5.09655404641913e-37,1.07726518788685e-09,0.000328483203903217,5.1116300167728e-09,1.66547556497394e-05,3.63348498536765e-12,2.1197677231767e-06,1.423759950343e-05,1.48402030326362e-06,4.02790333808468e-114,1.0892032281047e-61,2.31708028154681e-18,0.00311715667275661,3.48658948268913e-08,6.84391774571809e-10,0.00059931595115823,5.07835411090019e-14,0.00239279358392354,5.97226855991833e-30,5.4314537371314e-08,3.15725470720801e-22,6.71438773298967e-18,0.00447577646409257,6.01031152207013e-11,4.5371630228751e-09,1.58596057152335e-05,9.70870389901995e-12,1.29740981778239e-12,6.26774654414667e-27,1.07985201534885e-17,6.06366338564879e-25,1.62827283829197e-05,0.000252815294943413,2.82134548627108e-14,9.53042798607209e-11,0.00376393973375644,1.07582928098362e-11,2.0364280401727e-08,8.13080926016836e-05,1.5000067590117e-18,3.3839614118929e-06,8.21757967004785e-06,0.000747163289718758,1.92619271590296e-08,0.00554779746707025,3.09048641902015e-17,1.0235211753338e-11,8.0600225395759e-28,4.40932075640338e-10,5.81354974723493e-12,0.000814009248366134,2.1182571894377e-31,3.32137868702031e-28,0.00104106840966066,0.00562416823348448,2.5559485320827e-05,0.00227559853208954,1.81442902917746e-14,1.10735848659262e-08,0.000114098993842258,8.78811453081201e-40,1.24578176517214e-13,0.000189650783676586,1.82796463722906e-12,8.68637921111584e-67,1.1616787501396e-25,4.96700020570249e-05,1.13250824335265e-15,5.84564667761511e-43,0.00275486708846446,0.000447885987375418,7.15767787972849e-89,3.57656045463577e-27,6.37662048298534e-41,3.45187260001293e-11,2.72401346781592e-11,6.2028338801112e-06,0.000429261517132095,2.17482745996874e-05,1.24198779362951e-09,4.86890828592406e-17,0.000661527602198423,0.00021693956309542,0.00232011029557068,1.74256291511725e-14,0.00365756702833668,0.000220344984349504,0.00480844298541867,3.75650650370447e-14,7.0010892165485e-06,3.05325623479323e-13,0.00334928481287289,0.000215602930571133,0.0055858419957449,4.25241267325797e-19,0.000156915739373171,1.54190295905934e-16,3.50838613892351e-08,8.97439918046655e-22,4.63208596926672e-10,2.67184271925918e-12,4.23134272849491e-06,1.98675566884883e-38,2.16947321165937e-20,7.75536806244907e-15,4.06355625085553e-07,0.000210062705653346,8.94965902622293e-11,3.0755857172295e-09,0.00108722808559906,1.94671972318079e-13,3.73681701929427e-06,0.00472373459351045,3.64261005492783e-46,1.97726603752063e-11,0.00369446636418869,0.000860133234555633,1.41409870754578e-23,1.65190004998792e-169,0.00026165765981138,2.36935467216309e-17,2.42209411890146e-32,4.94605636629722e-19,6.96133993907348e-18,1.03663373980116e-06,2.91270337530621e-09,2.49569020760753e-11,1.33075106024425e-05,0.000762856912998814,0.000159315678433566,0.00367613215322904,1.74279127577011e-83,3.5022652856461e-41,5.03358814438043e-36,0.00322124935474832,1.77175310509836e-29,0.00391465672990697,4.26284368319025e-13,0.00156873122006879,0.00602765730734753,0.00118791305328312,0.000379851903399757,9.63092581012994e-14,1.18847455006095e-34,0.00079489873537259,0.00267286563745671,4.14361860604087e-05,0.000342359122585182,1.25535667737506e-17,3.47980566617083e-19,0.00111044204281893,0.00395363274429062,4.71043357563534e-32,1.90990704441001e-14,3.99878601971404e-05,4.35196523480553e-08,2.40854843527561e-20,0.00226815386640092,0.00200447481609014,0.00557792494141169,0.00127489108462163,1.48713350514146e-19,1.5281754239964e-25,8.07003151752144e-06,0.00107921655190184,1.35129372448119e-24,1.76203533654349e-13,4.69336130725508e-07,1.79929360619899e-05,1.56528971329907e-06,1.95747338096583e-09,0.00328027286097519,8.13637104090061e-06,1.17549173875765e-09,0.00219240131247302,0.000143347029802319,0.000157481818578604,4.91828821101789e-21,0.000187370424944673,3.78339322958357e-12,1.12154089519141e-13,1.63450825651444e-24,7.55364821815337e-06,3.29570384289157e-37],[7.41004742017966e-59,0.0226044025628499,3.67055637248364e-10,1.24188626752953e-14,1.94196628482912e-18,9.8901230135055e-12,1.42493547295699e-15,2.08685825262443e-25,4.83932099882014e-20,2.92132829929719e-34,0.00555761662681625,0.000323696843459592,0.00513896294845057,2.70864626121685e-15,0.0146429002692328,3.81624168686649e-176,0.00331391819426309,1.29085412479411e-06,1.65893771075445e-32,7.03748225389493e-25,2.78532336431425e-11,2.97938177432612e-06,2.69195502802621e-23,8.36625741788e-09,1.49437952396745e-21,1.04674174582139e-07,0.000483164331465915,5.08936602136734e-32,2.09509436960933e-15,1.03727865482963e-20,1.04118014200356e-18,0.0399147366538222,0.0471263141592445,2.87205235313521e-11,2.40023551932764e-160,0.000173937503128033,0.00168604264171477,1.34086015490631e-169,2.42765857744431e-34,4.48372413637952e-08,0.0044309480998774,1.90552677233956e-07,0.000333639894721648,2.37812979118643e-10,5.40919299360626e-05,0.000291344100578541,3.87926526834826e-05,6.90704864414761e-111,9.33882847776968e-59,3.15343592602894e-16,0.0288311772515806,1.15868287692157e-06,2.93398753758935e-08,0.00730943807287435,4.31107011355032e-12,0.0230514743691691,1.89652706047184e-27,1.71842377646364e-06,5.75963869353222e-20,8.59241200338111e-16,0.0381843854757509,3.0313182935429e-09,1.70621209465487e-07,0.000321466334284662,5.78072411320813e-10,9.19338163443486e-11,1.53541882484324e-24,1.34183350429001e-15,1.33307307355263e-22,0.000327718575481581,0.00354189271053075,2.44345618174629e-12,4.61660392952441e-09,0.0334425070230339,6.31791798298187e-10,7.02523844545244e-07,0.0013669325215036,2.07436418576875e-16,8.33738078895681e-05,0.00018206079610075,0.00884831221829921,6.68630621301698e-07,0.045431533412283,3.48655665219457e-15,6.05218659124967e-10,2.15958228919762e-25,1.92885286558176e-08,3.61198373426031e-10,0.00952157611936048,6.98536043932262e-29,9.81982788362487e-26,0.0116834038539666,0.0457945094338993,0.000481641817891805,0.0221967938727369,1.62051192668412e-12,4.02308968815471e-07,0.00181499957922732,5.02328626581215e-37,9.8901230135055e-12,0.0028035617573156,1.25383750396816e-10,9.3096269195134e-64,2.69195502802621e-23,0.000876276949870229,1.15596734267924e-13,4.176714551156e-40,0.0258427028626852,0.00568073144342726,1.0228321690132e-85,9.01924392295502e-25,3.90522457293688e-38,1.81572734187183e-09,1.4689114133996e-09,0.000142965316365789,0.00549326604162773,0.000417158179905414,5.11961699162471e-08,5.42156099266401e-15,0.00797740880625778,0.00313138015821571,0.0225795978141011,1.57270888781214e-12,0.0327690487993299,0.00316986224129639,0.0404986150854417,3.22082867627621e-12,0.000159369333705846,2.33737669259975e-11,0.030484891704429,0.00311733478367099,0.0455789399002893,6.17969258652777e-17,0.00237702393884376,1.63213283592281e-14,1.16142481680039e-06,1.60305205361084e-19,2.01601548733466e-08,1.78971714647876e-10,0.000102195866349621,1.06465269404437e-35,3.44464135495693e-18,7.30709074367454e-13,1.16136437649451e-05,0.00305785677125941,4.38482151376202e-09,1.17200319731226e-07,0.0120437901885353,1.50370945104073e-11,9.10212191006508e-05,0.0399421108528192,2.83924896463193e-43,1.10837863429902e-09,0.0328764608861321,0.0100200847188587,2.75556416329489e-21,4.72113034286547e-166,0.00364196879094606,2.70864626121685e-15,8.65293123977547e-30,7.06791454743873e-17,8.77743068200236e-16,2.82161831271592e-05,1.11988873272984e-07,1.36293298344121e-09,0.000276267786695743,0.00900927709649013,0.00240065488029771,0.0328168715143259,2.13467034263613e-80,2.30987865839459e-38,2.15789923749589e-33,0.0294759786207173,5.42536111539762e-27,0.0344364502946089,3.12389929398916e-11,0.0162443254599877,0.0483396691917597,0.0129253382218902,0.00497989330236929,7.9399574900052e-12,4.63180945101027e-32,0.00932347709587495,0.0253228176525457,0.000740153873504051,0.00456455883244397,1.51597579603011e-15,5.14411272099115e-17,0.0122534492601409,0.0345902521934161,1.6154902990999e-29,1.6882003091517e-12,0.000720285532206474,1.40806603483859e-06,3.75470805164602e-18,0.0221519614736962,0.0200307308544952,0.0455789399002893,0.0137447700797784,2.23696187247067e-17,3.44804633824872e-23,0.000179720649951244,0.0119860138808372,2.89649809842543e-22,1.37342645232035e-11,1.32808184318169e-05,0.00035710980045255,4.07926869356419e-05,7.84714263965363e-08,0.0299840719722829,0.000180728614778968,4.8689208541585e-08,0.0215076073834596,0.00219083321483972,0.00238047334788062,8.26851041593478e-19,0.00277463561912889,2.45748587503405e-10,9.0717845616709e-12,3.41811555886704e-22,0.000169541831995934,1.66219792640896e-34],["Ama","Amy-d","Amy-p","Argk","Cyt-b5-r","Eip74EF","grk","Hsp23","Hsp26","Hsp27","NimC3","E(spl)m3-HLH","Mlc2","MtnA","nkd","sesB","sev","sn",null,"Treh","CrebA","Galphaf","Sema2a","alpha-Est1","Reg-2","stet","Sr-CIII","teq","Mct1","Sox100B","Picot","stan",null,"CG3457","Ant2","RhoGAP1A","Idgf4","SPARC","l(1)G0196","bgm",null,null,"Ercc1","NimB4","NimC2","miple2",null,"Hml","CG3168","CG12116","spirit","CG2444","CG9503","CG9164","wus","CCKLR-17D3","bves","CG4297","CG5001","CG5397",null,"Sr-CIV","CG8852","Cyp28d2","Cyp28d1","CG12512",null,"CG8292","firl","CG5418",null,"ChLD3","SPH93",null,"Cyp6w1","Spn42Dc","CG13744","PPO2","CG13743","CG1648","Lime",null,"CG12934","Prip","CG8501",null,"Cyp9h1","sug",null,"CG8468","CG8157","CG4927","CG5550","veil","CG5773","Mctp","CG15080","CG18190",null,"CG9416","twz","wdp","gas",null,"CG3831","Eglp4","Sesn","CG18128","Ance-5","CG3770","Gale","CG9119","Gk2","Cyp4d20","Ctl1","slow","SP1173","CG10063",null,"mthl6","CG13308","CG5144","Slc45-1","CG4476","Muc68Ca","CG10663","Tgi","CG5895","CG5151","MYPT-75D","CG3961","Gbs-76A","zye","CG10581","olf413",null,"CG1124","CG9837","CAHbeta","CG16749","CG8500","GILT1","Npc2b","Pde6","CG14856",null,"EndoU","CG5246","CG14326","pasi1","PKD","CG15695","cDIP","CG6763","CG10184","CG10365","Kal1","CG6356","tnc","CG12290","CG6330","CG14257","CG17189","Sid","CG14516","Cyt-c1L","CG9733","Rpt6R","CG12071","CG1544","Ugt317A1","lectin-28C","CG2854","CG13315","cpx","cbt","CG12880","CG30088","CG30148","Mal-A5","Pgant9","LpR2","CG31125","SKIP",null,"ATPsynepsilonL","CG31642",null,"edin","CG32313","CG32407","CG32625","X11Lbeta","CG32681","CG33307","CG33346","CG33643","CG34057","CG31808","GstE2","CG6006","CG32335","CG34305","CG34330",null,"bbg",null,"CG34434","CG42324","comm3","DIP-epsilon","CG42369","CG42394","CG42395","CG42458","NimC4","CG42524","Pif1A","bou",null,null,"ps"],["40831","36932","47764","39041","35008","39962","34171","39077","39075","39078","48772","43156","43587","41202","44843","32007","32039","31717",null,"45368","39682","39861","36846","40909","38075","38169","44382","39048","31198","45039","36865","36125",null,"31196","32008","5740235","31926","43230","33137","44117",null,null,"36654","34814","34818","44787",null,"39529","31612","31782","31797","32121","32424","32467","32683","32864","33083","33222","33308","33313",null,"33576","33577","33748","33749","33766",null,"34125","34627","34663",null,"35002","35049",null,"35543","35600","35906","35910","35911","36009","36023",null,"36124","36237","36347",null,"36412","36424",null,"36577","36700","36852","36883","36968","37053","37165","37167","37179",null,"37223","37456","37548","37572",null,"37648","37739","37755","37756","37980","37991","38076","38124","38221","38311","38523","38540","38744","38764",null,"38839","39011","39040","39055","39056","2768980","39421","39521","39752","39772","40032","40056","40102","40255","40326","40453",null,"40613","41057","41070","41111","41203","41650","41710","41760","41790",null,"41931","42072","42120","42139","42203","42468","42512","42754","42783","42801","42865","42893","42990","43182","43240","43257","43263","43390","43444","43457","43601","43635","43660","43689","37590","53542","31219","50300","64877","33224","43328","246447","37318","35828","246627","43105","318599","42601",null,"326144","326149",null,"317900","317973","38667","318128","31997","318151","2768914","2768690","3772011","3885645","10178782","37107","41962","261663","5740825","2768869",null,"39583",null,"31472","38430","39696","7354433","33894","7354424","7354436","2768945","34824","8674084","8674049","31644",null,null,"44258"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>baseMean<\/th>\n      <th>log2FoldChange<\/th>\n      <th>lfcSE<\/th>\n      <th>stat<\/th>\n      <th>pvalue<\/th>\n      <th>padj<\/th>\n      <th>symbol<\/th>\n      <th>entrez<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">as.data.frame</span>(res_sig), <span class="at">file =</span> <span class="st">"./results/deseq2/Treated-Untreated.signif.csv"</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">as.data.frame</span>(res_lfc), <span class="at">file =</span> <span class="st">"./results/deseq2/Treated-Untreated.signif-lfc.csv"</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co">#saving the final results to rds object</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(res_lfc,<span class="st">"./results/deseq2/sign_results.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>##Plotting of DESEQ2 results</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co">#getting the top genes</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>top <span class="ot">&lt;-</span> <span class="fu">rownames</span>(res)[<span class="fu">which.min</span>(res<span class="sc">$</span>padj)]</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>top_gene<span class="ot">&lt;-</span>res<span class="sc">$</span>symbol[[top]] </span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>top_gene</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "sesB"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plotCounts</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plotCounts</span>(dds_seq, <span class="at">gene =</span> top, <span class="at">intgroup =</span> <span class="st">"condition"</span>, <span class="at">main =</span> top_gene) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co">#plotMA</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plotMA</span>(res,<span class="at">main =</span><span class="st">"MA Plot of Differentially Expressed genes"</span>)</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>), <span class="at">col=</span><span class="st">"dodgerblue"</span>, <span class="at">lwd=</span><span class="dv">2</span>)</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">1e+04</span>, <span class="dv">3</span>, <span class="at">legend=</span><span class="fu">c</span>(<span class="st">"Non Sign"</span>, <span class="st">"Sign"</span>), </span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="fu">c</span>(<span class="st">"grey"</span>,<span class="st">"blue"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co">#some extra plots:</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co">#volcanoplot</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="fu">EnhancedVolcano</span>(res,</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">lab =</span> res<span class="sc">$</span>symbol,</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'log2FoldChange'</span>,</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'pvalue'</span>,</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">'Volcano Plot of Differentially Expressed genes'</span>,</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">pCutoff =</span> <span class="fl">10e-32</span>,</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">FCcutoff =</span> <span class="dv">2</span>,</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">pointSize =</span> <span class="fl">3.0</span>,</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">labSize =</span> <span class="fl">6.0</span> ,</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>                )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-6-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">#heatmap</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a><span class="co">#genes_nobatch&lt;-order(res_lfc_nobatch$log2FoldChange, decreasing=TRUE)[1:20]</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="co">#res_lfc&lt;-res_lfc[complete.cases(res_lfc), ]</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="co">#rownames(res_lfc) &lt;- res_lfc$symbol</span></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">order</span>(res_lfc<span class="sc">$</span>log2FoldChange, <span class="at">decreasing=</span><span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>genes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  86 137  75 112  35 202 181  69   1 143  70 117 182 219 216 128 158  23  53
+[20]  19</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>gene_names<span class="ot">&lt;-</span><span class="fu">rownames</span>(res_lfc)[genes]</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>names<span class="ot">&lt;-</span>res_lfc<span class="sc">$</span>symbol[gene_names]</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>names</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FBgn0033764 FBgn0037290 FBgn0033065 FBgn0035189 FBgn0025111 FBgn0063667 
+         NA    "CG1124"    "Cyp6w1"    "CG9119"      "Ant2"   "CG32335" 
+FBgn0050463 FBgn0032405 FBgn0000071 FBgn0038198 FBgn0032436 FBgn0035710 
+   "Pgant9"      "firl"       "Ama"     "Npc2b"    "CG5418"    "SP1173" 
+FBgn0051092 FBgn0261284 FBgn0260011 FBgn0036560 FBgn0039178 FBgn0011260 
+     "LpR2"       "bou"     "NimC4"    "CG5895"    "CG6356"    "Sema2a" 
+FBgn0030598 FBgn0003501 
+   "CG9503"          NA </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>names<span class="ot">&lt;-</span><span class="fu">data.frame</span>(names)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(<span class="fu">assay</span>(rld)[gene_names,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "untreated1" "untreated2" "untreated3" "untreated4" "treated1"  
+[6] "treated2"   "treated3"  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>new<span class="ot">&lt;-</span><span class="fu">cbind</span>(names,<span class="fu">assay</span>(rld)[gene_names,])</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="co">#rownames(new)&lt;-new$names</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">subset</span> (new, <span class="at">select =</span> <span class="sc">-</span>names)</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>annot_col <span class="ot">&lt;-</span> samples_initial<span class="sc">%&gt;%</span></span>
+<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">column_to_rownames</span>(<span class="st">'sample'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(condition,type) <span class="sc">%&gt;%</span></span>
+<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span>
+<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a><span class="co">#assay(vsd)[genes, ]</span></span>
+<span id="cb64-17"><a href="#cb64-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-18"><a href="#cb64-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-19"><a href="#cb64-19" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(df, <span class="at">cluster_rows=</span><span class="cn">TRUE</span>, <span class="at">labels_row =</span> names<span class="sc">$</span>names,<span class="at">legend_breaks =</span> <span class="sc">-</span><span class="dv">2</span><span class="sc">:</span><span class="dv">2</span>,</span>
+<span id="cb64-20"><a href="#cb64-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">cluster_cols=</span><span class="cn">FALSE</span>, <span class="at">annotation_col=</span>annot_col, <span class="at">main=</span> <span class="st">"Heatmap of expression of genes"</span>,<span class="at">scale =</span> <span class="st">"row"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-6-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>#**********************************GSEA******************************************* #Go</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co">#reading in data from deseq2</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">read.csv</span>(<span class="st">"./results/deseq2/Treated-Untreated.signif-lfc.csv"</span>, <span class="at">header=</span><span class="cn">TRUE</span>)</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="co"># we want the log2 fold change </span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>original_gene_list <span class="ot">&lt;-</span> df<span class="sc">$</span>log2FoldChange</span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a><span class="co"># name the vector</span></span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>X<span class="ot">&lt;-</span>df<span class="sc">$</span>symbol</span>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(original_gene_list) <span class="ot">&lt;-</span> df<span class="sc">$</span>X</span>
+<span id="cb65-10"><a href="#cb65-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-11"><a href="#cb65-11" aria-hidden="true" tabindex="-1"></a><span class="co"># omit any NA values </span></span>
+<span id="cb65-12"><a href="#cb65-12" aria-hidden="true" tabindex="-1"></a>gene_list<span class="ot">&lt;-</span><span class="fu">na.omit</span>(original_gene_list)</span>
+<span id="cb65-13"><a href="#cb65-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-14"><a href="#cb65-14" aria-hidden="true" tabindex="-1"></a><span class="co"># sort the list in decreasing order (required for clusterProfiler)</span></span>
+<span id="cb65-15"><a href="#cb65-15" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">=</span> <span class="fu">sort</span>(gene_list, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb65-16"><a href="#cb65-16" aria-hidden="true" tabindex="-1"></a>gene_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          &lt;NA&gt;         CG1124         Cyp6w1         CG9119           Ant2 
+      3.417176       3.082179       2.969577       2.890949       2.852111 
+       CG32335         Pgant9           firl            Ama          Npc2b 
+      2.734850       2.666256       2.654547       2.621449       2.393915 
+        CG5418         SP1173           LpR2            bou          NimC4 
+      2.328448       2.325618       2.317284       2.307225       2.299768 
+        CG5895         CG6356         Sema2a         CG9503           &lt;NA&gt; 
+      2.265694       2.174420       2.159577       2.157050       2.132372 
+       CG12880           stet            Sid        CG31642             sn 
+      2.089417       2.088991       1.974771       1.968425       1.954008 
+        Cyp9h1         CG9416         CG9733          Rpt6R        CG33346 
+      1.938504       1.913676       1.906141       1.895075       1.879482 
+        olf413           &lt;NA&gt;        CG34434           slow         CG5144 
+      1.802652       1.801498       1.778325       1.762661       1.742019 
+          &lt;NA&gt;        CG33643           SKIP         CG4476          Hsp27 
+      1.735546       1.716219       1.710251       1.706241       1.665793 
+       CG10663        Cyp28d2        CG32625        CG10581        CG16749 
+      1.662677       1.661624       1.638044       1.610115       1.609553 
+          Ctl1          Eglp4        CG10063        CG15080        CG13308 
+      1.609258       1.566312       1.564753       1.519839       1.500421 
+          &lt;NA&gt;        CG14257          Hsp23     CCKLR-17D3         CG3457 
+      1.491167       1.479494       1.468211       1.452808       1.438535 
+          stan         miple2        CG14856         CG8501           &lt;NA&gt; 
+      1.432798       1.422789       1.409272       1.401176       1.399095 
+       CG42394        CG14326           PPO2        CG42395           edin 
+      1.397215       1.383340       1.379992       1.351482       1.350984 
+           wdp        CG17189        CG13743         Ance-5          Hsp26 
+      1.348955       1.346978       1.314689       1.311453       1.307491 
+       CG31125           &lt;NA&gt;           bves         CG4927       X11Lbeta 
+      1.282300       1.263557       1.242528       1.210632       1.205822 
+          &lt;NA&gt;           &lt;NA&gt;         CG5397           Argk           Prip 
+      1.203721       1.200664       1.195179       1.194226       1.185696 
+       CG42458          Idgf4           Lime ATPsynepsilonL        CG12934 
+      1.148352       1.143242       1.142739       1.140473       1.136780 
+         CrebA          pasi1        CG42324            bbg         Mal-A5 
+      1.113405       1.113312       1.110560       1.108433       1.105637 
+          Treh        Slc45-1        Gbs-76A        Cyt-c1L           &lt;NA&gt; 
+      1.100113       1.098447       1.072164       1.071960       1.066365 
+    alpha-Est1        CG18190          ChLD3        Spn42Dc         CG6330 
+      1.061834       1.061028       1.053058       1.047618       1.038940 
+          &lt;NA&gt;           &lt;NA&gt;            cpx         spirit          Ercc1 
+      1.037978       1.028553       1.027363       1.026777       1.022867 
+         GILT1            Gk2        Cyp28d1            wus        CG32681 
+      1.013828       1.006896       1.002677       1.000622      -1.001359 
+       CG13744        Muc68Ca        CG12071         CG5550            nkd 
+     -1.008053      -1.012775      -1.015020      -1.016052      -1.031153 
+   DIP-epsilon           cDIP       RhoGAP1A        CG34057         CG6763 
+     -1.037996      -1.041186      -1.042482      -1.043595      -1.044051 
+           tnc          NimB4       MYPT-75D            Tgi           &lt;NA&gt; 
+     -1.047435      -1.054610      -1.057524      -1.067715      -1.084311 
+          &lt;NA&gt;        CG30148          Pif1A         CG1648         CG9837 
+     -1.084596      -1.084824      -1.086081      -1.093136      -1.094014 
+        CG5151           &lt;NA&gt;          EndoU          Amy-d         CG8292 
+     -1.105644      -1.119302      -1.133082      -1.145017      -1.147062 
+           cbt        CG12290         CG8468           &lt;NA&gt;           Gale 
+     -1.148834      -1.166984      -1.169494      -1.174762      -1.176664 
+     l(1)G0196           Mlc2            bgm            grk        Eip74EF 
+     -1.182600      -1.205190      -1.226876      -1.228424      -1.229653 
+        CG2444          Amy-p            PKD        CG10365        CG34305 
+     -1.260132      -1.267410      -1.284551      -1.285320      -1.291483 
+        CG6006         CG4297           veil           &lt;NA&gt;         CG2854 
+     -1.294640      -1.309367      -1.314023      -1.315420      -1.328589 
+           zye          GstE2         Sr-CIV        CG42524         CG5246 
+     -1.332705      -1.340157      -1.354087      -1.367145      -1.373249 
+         SPH93        Galphaf        CG33307            sug         CG8157 
+     -1.386681      -1.404094      -1.405935      -1.430676      -1.462915 
+  E(spl)m3-HLH         CG3831        Sr-CIII         CG5001        CG30088 
+     -1.464358      -1.475708      -1.488565      -1.489171      -1.512701 
+          &lt;NA&gt;            teq       Ugt317A1           Mct1        CG31808 
+     -1.527000      -1.532187      -1.575478      -1.617718      -1.619430 
+          &lt;NA&gt;        Cyp4d20     lectin-28C         CG3961        CG10184 
+     -1.631934      -1.659217      -1.747685      -1.749034      -1.779108 
+       CG14516         CG5773        CG32313        CG12512        CG42369 
+     -1.804567      -1.838048      -1.849116      -1.859467      -1.864273 
+          &lt;NA&gt;             ps            sev         CG8852           Mctp 
+     -1.868303      -1.868729      -1.893449      -1.894921      -1.915063 
+          Sesn        CG13315          NimC3          Reg-2           &lt;NA&gt; 
+     -1.933886      -1.974609      -1.981340      -2.007548      -2.023454 
+          MtnA       Cyt-b5-r        CG32407            Hml         CG8500 
+     -2.044324      -2.075420      -2.170633      -2.197023      -2.259098 
+         Picot            twz         CG3168          NimC2          SPARC 
+     -2.293948      -2.366750      -2.442903      -2.445096      -2.477764 
+       CG15695         CG3770          mthl6           &lt;NA&gt;        CG18128 
+     -2.493696      -2.583128      -2.593216      -2.609952      -2.770227 
+       CAHbeta        CG12116           Pde6          comm3           sesB 
+     -2.795744      -2.834946      -2.871559      -3.025432      -3.126667 
+        CG9164            gas           &lt;NA&gt;         CG1544           Kal1 
+     -3.201285      -3.534953      -3.651881      -4.184856      -4.619789 
+       Sox100B        CG34330 
+     -4.621356      -4.896951 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">keytypes</span>(org.Dm.eg.db)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "ACCNUM"       "ALIAS"        "ENSEMBL"      "ENSEMBLPROT"  "ENSEMBLTRANS"
+ [6] "ENTREZID"     "ENZYME"       "EVIDENCE"     "EVIDENCEALL"  "FLYBASE"     
+[11] "FLYBASECG"    "FLYBASEPROT"  "GENENAME"     "GENETYPE"     "GO"          
+[16] "GOALL"        "MAP"          "ONTOLOGY"     "ONTOLOGYALL"  "PATH"        
+[21] "PMID"         "REFSEQ"       "SYMBOL"       "UNIPROT"     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>gse <span class="ot">&lt;-</span> <span class="fu">gseGO</span>(<span class="at">geneList=</span>gene_list, </span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">ont =</span><span class="st">"ALL"</span>, </span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">keyType =</span> <span class="st">"SYMBOL"</span>, </span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">nPerm =</span> <span class="dv">10000</span>, </span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">minGSSize =</span> <span class="dv">3</span>, </span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">maxGSSize =</span> <span class="dv">800</span>, </span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">pvalueCutoff =</span> <span class="fl">0.05</span>, </span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">verbose =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">OrgDb =</span> org.Dm.eg.db, </span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">pAdjustMethod =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>preparing geneSet collections...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>GSEA analysis...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .GSEA(geneList = geneList, exponent = exponent, minGSSize =
+minGSSize, : We do not recommend using nPerm parameter incurrent and future
+releases</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in fgsea(pathways = geneSets, stats = geneList, nperm = nPerm, minSize
+= minGSSize, : You are trying to run fgseaSimple. It is recommended to use
+fgseaMultilevel. To run fgseaMultilevel, you need to remove the nperm argument
+in the fgsea function call.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in preparePathwaysAndStats(pathways, stats, minSize, maxSize,
+gseaParam, : There are duplicate gene names, fgsea may produce unexpected
+results.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>leading edge analysis...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>done...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co">#dotplot</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(DOSE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: DOSE</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DOSE v3.20.1  For help: https://yulab-smu.top/biomedical-knowledge-mining-book/
+
+If you use DOSE in published research, please cite:
+Guangchuang Yu, Li-Gen Wang, Guang-Rong Yan, Qing-Yu He. DOSE: an R/Bioconductor package for Disease Ontology Semantic and Enrichment analysis. Bioinformatics 2015, 31(4):608-609</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dotplot</span>(gse, <span class="at">showCategory=</span><span class="dv">10</span>, <span class="at">split=</span><span class="st">".sign"</span>) <span class="sc">+</span> <span class="fu">facet_grid</span>(.<span class="sc">~</span>.sign)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="co">#enrichment map</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>gse_emap<span class="ot">&lt;-</span><span class="fu">pairwise_termsim</span>(gse) </span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a><span class="fu">emapplot</span>(gse_emap, <span class="at">showCategory =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="co">#category net plot</span></span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a><span class="co"># categorySize can be either 'pvalue' or 'geneNum'</span></span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cnetplot</span>(gse, <span class="at">categorySize=</span><span class="st">"pvalue"</span>, <span class="at">foldChange=</span>gene_list, <span class="at">showCategory =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-7-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co">#ridgeplot</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ridgeplot</span>(gse,<span class="at">showCategory =</span> <span class="dv">15</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"enrichment distribution"</span>) <span class="sc">+</span> <span class="fu">theme_ridges</span>(<span class="at">font_size =</span> <span class="dv">10</span>,  <span class="at">line_size =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Picking joint bandwidth of 0.243</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-7-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co">#gseaplot</span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a><span class="fu">gseaplot</span>(gse, <span class="at">by =</span> <span class="st">"all"</span>, <span class="at">title =</span> gse<span class="sc">$</span>Description[<span class="dv">1</span>], <span class="at">geneSetID =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-7-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="co">#pubmed</span></span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>terms <span class="ot">&lt;-</span> gse<span class="sc">$</span>Description[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pmcplot</span>(terms, <span class="dv">2012</span><span class="sc">:</span><span class="dv">2022</span>, <span class="at">proportion=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rna_seq_files/figure-html/unnamed-chunk-7-6.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
