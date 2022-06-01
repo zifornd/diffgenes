@@ -4,6 +4,14 @@ format: html
 editor: visual
 author: Riya Saju
 date: 31-May-2022
+toc : true
+toc-title : Contents
+toc-location : left
+fig-width: 8
+fig-height: 4
+code-fold: true
+fig-format : pdf
+cap-location: bottom
 ---
 
 ## Installation and loading of required packages
@@ -41,26 +49,16 @@ library(SummarizedExperiment)
 
 ## Getting data ready for the analysis
 
-Reading sample metadata provided by the client.Making sure the required fields are present in the metadata in the format required for the analysis. Making required changes if needed to make it in the format required.
+Reading sample metadata provided by the client. Making sure the required fields are present in the metadata in the format required for the analysis. Making required changes if needed to make it in the format required.
 
 ```{r}
 samples <- read.delim("./data/samples.tsv")
 ```
 
-Now let's have a look at the metadata.In this case, the metadata contains sample,condition and type .
+Now let's have a look at the metadata. In this case, the metadata contains sample,condition and type :
 
 ```{r}
 samples
-
-
-# #loading sample table for paired reads 
-# samples_paired <- samples[samples$type=="paired-end",]
-# samples_paired
-# 
-# #loading sample table for single reads 
-# samples_single <- samples[samples$type=="single-read",]
-# samples_single
-
 ```
 
 ## Starting from count matrix
@@ -78,16 +76,18 @@ samples
 -   Construction of *DESeqDataSet* object from the matrix of counts and the sample information table
 
 ```{r}
-#sample with both paired and single
+#sample table edits to get the required format
 samples <- read.delim("./data/samples.tsv")
 samples$group <- paste(samples$condition ,"_", samples$type)
 ```
 
--   Now lets have a look at the edited samples metadata for exploratory analysis:
+Now lets have a look at the edited samples metadata for exploratory analysis:
 
 ```{r}
+#| warning: false
 samples
 
+#reading the counts matrix
 Counts<- read.delim("./data/counts.tsv")
 countDataMatrix <- as.matrix(Counts[ , -1])
 rownames(countDataMatrix) <- Counts[ , 1]
@@ -100,19 +100,21 @@ dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, de
 DESeq2 offers transformations for count data that stabilize the variance across the mean.it minimizes differences between samples for rows with small counts, and normalizes with respect to library size. One such transformation is the regularized-logarithm transformation or rlog2. Another transformation that similarly improves distance calculation across samples, the variance stabilizing transformation.for datasets with larger sample size, the variance stabilizing transformation will be much faster to compute.The two transformations (rlog and VST) are provided for applications other than differential testing.Raw counts work better for differential expression analysis since deseq2 has inbuild normalization.
 
 ```{r}
+#| warning: false
 #rlog transformation for data visualization
 rld <- rlog(dds, blind=TRUE)
 ```
 
-#PCA Plot
+**PCA Plot**
 
 A way to visualize sample-to-sample distances is a principal components analysis (PCA). In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
 
 ```{r}
-
+#| warning: false
 plot <-plotPCA(rld, intgroup="group")
-p <- plot  + ggtitle("PCA plot - Sample Distances") 
-p
+pca <- plot  + ggtitle("PCA plot - Sample Distances") 
+pca
+
 ```
 
 In the PCA Plot - PC1 , the highest variation seems to be due to the sequencing type and PC2 , is due to the condition,i.e treated / untreated. The major change in gene expression was due to the sequencing type - paired / single in this case which will act as a noise in trying to find out the real differentially expressed genes due to the depletion of pasilla gene.
@@ -124,22 +126,23 @@ Inferences :
 3.  Shows sample-sample distance based on gene expression
 4.  Did not remove any outlier samples as it looked okayish
 
-#Heatmap
+**Heatmap**
 
 Sample - sample distance can be viewed in Heatmap also. A heatmap of this distance matrix gives us an overview over similarities and dissimilarities between samples. We have to provide a hierarchical clustering hc to the heatmap function based on the sample distances, or else the heatmap function would calculate a clustering based on the distances between the rows/columns of the distance matrix.
 
 ```{r}
+#| warning: false
 rld_mat <- assay(rld) 
 rld_cor <- cor(rld_mat) 
-head(rld_cor)
 samples_initial<- read.delim("./data/samples.tsv")
 annot_col <- samples_initial%>%
   column_to_rownames('sample') %>%
   dplyr::select(type) %>%
   as.data.frame()
 
-pheatmap(mat=rld_cor,main = "Heatmap - Sample Distances",color = viridis(n=256),
+heatmap<-pheatmap(mat=rld_cor,main = "Heatmap - Sample Distances",color = viridis(n=256),
 annotation_col = annot_col)
+heatmap
 
 ```
 
@@ -147,16 +150,18 @@ Inferences:
 
 1.  Every sample seems correlated.-more than 0.99.
 2.  Treated2 and treated 3 , untreated 3 and untreated 4 shows high similarity due to sequencing type
-3.  Untreated_paired & Untreated_single supposed to be similar but not due to batch effect same goes with Treated
-4.  More clustering based on batch effect rather than on condition.
-5.  Untreated_single(76,82) didn't show much similarity as expected.
+3.  More clustering based on batch effect rather than on condition.
+4.  Untreated_single didn't show much similarity as expected compared to paired reads
 
 ##DESEQ2 Analysis
 
 ```{r}
+#| warning: false
 #DESEQ2 with condition and layout as factors 
 dds_seq <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, design = ~type + condition) 
 dds_seq
+#Saving the dds object as rds
+saveRDS(dds_seq,"./results/deseq2/dds.rds")
 
 keep <- rowSums(counts(dds_seq)) >= 10
 dds_seq <- dds_seq[keep, ]
@@ -172,6 +177,7 @@ summary(res)
 ##Annotating to other names-entrez/gene symbol
 
 ```{r}
+#| warning: false
 columns(org.Dm.eg.db)
 
 #mapping ensembl id to enrez id and gene symbol using mapIds
@@ -219,7 +225,7 @@ saveRDS(res_lfc,"./results/deseq2/sign_results.rds")
 
 ```{r}
 #getting the top genes
-
+#| warning: false
 top <- rownames(res)[which.min(res$padj)]
 top_gene<-res$symbol[[top]] 
 top_gene
@@ -304,7 +310,7 @@ pheatmap(df, cluster_rows=TRUE, labels_row = names$names,legend_breaks = -2:2,
 
 
 
-
+#| warning: false
 #reading in data from deseq2
 df = read.csv("./results/deseq2/Treated-Untreated.signif-lfc.csv", header=TRUE)
 
