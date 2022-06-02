@@ -7,11 +7,8 @@ date: 31-May-2022
 toc : true
 toc-title : Contents
 toc-location : left
-fig-width: 8
-fig-height: 4
 code-fold: true
-fig-format : pdf
-cap-location: bottom
+fig-cap-location: bottom
 ---
 
 ## Installation and loading of required packages
@@ -55,15 +52,13 @@ Reading sample metadata provided by the client. Making sure the required fields 
 samples <- read.delim("./data/samples.tsv")
 ```
 
-Now let's have a look at the metadata. In this case, the metadata contains sample,condition and type :
+Now let's have a look at the metadata:
 
 ```{r}
 samples
 ```
 
 ## Starting from count matrix
-
--   Making necessary changes to the sample metadata to combine condition and type
 
 -   Reading counts matrix of the client
 
@@ -77,7 +72,7 @@ samples
 
 ```{r}
 #sample table edits to get the required format
-samples <- read.delim("./data/samples.tsv")
+
 samples$group <- paste(samples$condition ,"_", samples$type)
 ```
 
@@ -97,7 +92,7 @@ dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, de
 
 ## Exploratory Analysis and Visualization
 
-DESeq2 offers transformations for count data that stabilize the variance across the mean.it minimizes differences between samples for rows with small counts, and normalizes with respect to library size. One such transformation is the regularized-logarithm transformation or rlog2. Another transformation that similarly improves distance calculation across samples, the variance stabilizing transformation.for datasets with larger sample size, the variance stabilizing transformation will be much faster to compute.The two transformations (rlog and VST) are provided for applications other than differential testing.Raw counts work better for differential expression analysis since deseq2 has inbuild normalization.
+DESeq2 offers transformations for count data that stabilize the variance across the mean.It minimizes differences between samples for rows with small counts, and normalizes with respect to library size. One such transformation is the regularized-logarithm transformation or rlog2. Another transformation that similarly improves distance calculation across samples, the variance stabilizing transformation.For data sets with larger sample size, the variance stabilizing transformation will be much faster to compute.The two transformations (rlog and VST) are provided for applications other than differential testing.Raw counts work better for differential expression analysis since deseq2 has inbuild normalization.
 
 ```{r}
 #| warning: false
@@ -107,24 +102,23 @@ rld <- rlog(dds, blind=TRUE)
 
 **PCA Plot**
 
-A way to visualize sample-to-sample distances is a principal components analysis (PCA). In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
+A way to visualize sample-to-sample distances is  principal components analysis (PCA). In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
 
 ```{r}
 #| warning: false
-plot <-plotPCA(rld, intgroup="group")
-pca <- plot  + ggtitle("PCA plot - Sample Distances") 
+#| label: fig-pcaplot
+#| fig-cap: PCA Plot of Sample Distances
+#| fig-width: 6
+#| fig-height: 3.5
+pca <-plotPCA(rld, intgroup="group")
 pca
 
 ```
 
-In the PCA Plot - PC1 , the highest variation seems to be due to the sequencing type and PC2 , is due to the condition,i.e treated / untreated. The major change in gene expression was due to the sequencing type - paired / single in this case which will act as a noise in trying to find out the real differentially expressed genes due to the depletion of pasilla gene.
+In @fig-pcaplot, We can see the distance between the samples gene expression,
+find out the reasons for clustering of samples , investigate if there are any batch effects and add them in deseq2 while modelling.PCA is also useful to remove the outlier samples for the downstream analysis .
 
-Inferences :
 
-1.  Identified the batch effect and will add while modelling deseq2
-2.  Found that major sample-sample distance was caused due to sequencing type
-3.  Shows sample-sample distance based on gene expression
-4.  Did not remove any outlier samples as it looked okayish
 
 **Heatmap**
 
@@ -132,6 +126,10 @@ Sample - sample distance can be viewed in Heatmap also. A heatmap of this distan
 
 ```{r}
 #| warning: false
+#| label: fig-heatmap
+#| fig-cap: Heatmap Plot of Sample Distances
+#| fig-width: 6
+#| fig-height: 3.5
 rld_mat <- assay(rld) 
 rld_cor <- cor(rld_mat) 
 samples_initial<- read.delim("./data/samples.tsv")
@@ -145,15 +143,11 @@ annotation_col = annot_col)
 heatmap
 
 ```
+@fig-heatmap helps to find out the relation between the samples,clustering of samples and reasons behind it. PCA plots can be verified based on the results from the heatmap.
 
-Inferences:
-
-1.  Every sample seems correlated.-more than 0.99.
-2.  Treated2 and treated 3 , untreated 3 and untreated 4 shows high similarity due to sequencing type
-3.  More clustering based on batch effect rather than on condition.
-4.  Untreated_single didn't show much similarity as expected compared to paired reads
 
 ##DESEQ2 Analysis
+
 
 ```{r}
 #| warning: false
