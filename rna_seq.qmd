@@ -102,7 +102,7 @@ rld <- rlog(dds, blind=TRUE)
 
 **PCA Plot**
 
-A way to visualize sample-to-sample distances is  principal components analysis (PCA). In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
+A way to visualize sample-to-sample distances is principal components analysis (PCA). In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
 
 ```{r}
 #| warning: false
@@ -115,10 +115,7 @@ pca
 
 ```
 
-In @fig-pcaplot, We can see the distance between the samples gene expression,
-find out the reasons for clustering of samples , investigate if there are any batch effects and add them in deseq2 while modelling.PCA is also useful to remove the outlier samples for the downstream analysis .
-
-
+In @fig-pcaplot, We can see the distance between the samples gene expression, find out the reasons for clustering of samples , investigate if there are any batch effects and add them in deseq2 while modelling.PCA is also useful to remove the outlier samples for the downstream analysis .
 
 **Heatmap**
 
@@ -143,10 +140,18 @@ annotation_col = annot_col)
 heatmap
 
 ```
+
 @fig-heatmap helps to find out the relation between the samples,clustering of samples and reasons behind it. PCA plots can be verified based on the results from the heatmap.
 
+## Differential expression analysis
 
-##DESEQ2 Analysis
+We can run the differential expression pipeline on the raw counts with a single call to the function DESeq.This function will print out a message for the various steps it performs.The various steps includes:
+
+1. The estimation of size factors, controlling for differences in the counts due varying sequencing depth of the samples.
+
+2. The estimation of dispersion values. The dispersion parameter captures how much the counts for the samples will vary around an expected value. Note that the expected value takes into consideration the sequencing depth and differences that can be attributed to variables in the design formula.
+
+3. Fitting a final generalized linear model using the size factors and dispersion values estimated above, which gives estimates of the log fold changes.
 
 
 ```{r}
@@ -154,17 +159,37 @@ heatmap
 #DESEQ2 with condition and layout as factors 
 dds_seq <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, design = ~type + condition) 
 dds_seq
-#Saving the dds object as rds
+#Saving the dds object as rds in results directory
 saveRDS(dds_seq,"./results/deseq2/dds.rds")
 
+#filtering the records by condition
 keep <- rowSums(counts(dds_seq)) >= 10
 dds_seq <- dds_seq[keep, ]
 
-#deseq2 analysis
+#deseq2 analysis using DESeq function
 dds_seq <- DESeq(dds_seq)
+
+```
+Calling results without any arguments will extract the estimated log2 fold changes and p values for the last variable in the design formula.This comparison is printed at the top of the output.
+
+
+```{r}
+#Building the results table
 res <- results(dds_seq, contrast = c("condition",  "treated", "untreated"))
 res
+#res  carries metadata with information on the meaning of the columns
 mcols(res, use.names = TRUE)
+```
+Lets have a look at what each column means :
+1. Base Mean :  average of the normalized count values, dividing by size factors, taken over all samples in the DESeqDataSet
+
+2. log2FoldChange :It is the effect size estimate. It tells us how much the gene’s expression seems to have changed due to the factor. This value is reported on a logarithmic scale to base 2.
+
+3. lfcSE :  the standard error estimate for the log2 fold change estimate.
+
+4. pvalue :  result of hypothesis test for each gene is reported as a p value.For example, the set of genes with adjusted p value less than 0.1 should contain no more than 10% false positives.
+
+#summarizing the results which will report some additional information
 summary(res)
 ```
 
