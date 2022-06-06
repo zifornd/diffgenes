@@ -8,6 +8,8 @@ toc : true
 toc-title : Contents
 toc-location : left
 code-fold: true
+code-line-numbers: true
+number-sections: true
 fig-cap-location: bottom
 ---
 
@@ -46,19 +48,22 @@ library(SummarizedExperiment)
 
 ## Getting data ready for the analysis
 
-Reading sample metadata provided by the client. Making sure the required fields are present in the metadata in the format required for the analysis. Making required changes if needed to make it in the format required.
+Reading sample metadata provided by the client.
 
 ```{r}
 samples <- read.delim("./data/samples.tsv")
 ```
-
 Now let's have a look at the metadata:
-
 ```{r}
 samples
 ```
 
-## Starting from count matrix
+
+::: callout-note
+## Making sure the required fields are present in the metadata in the format required for the analysis. Making required changes if needed to make it in the format required.
+:::
+
+## Starting from Count matrix
 
 -   Reading counts matrix of the client
 
@@ -74,6 +79,7 @@ samples
 #sample table edits to get the required format
 
 samples$group <- paste(samples$condition ,"_", samples$type)
+
 ```
 
 Now lets have a look at the edited samples metadata for exploratory analysis:
@@ -92,7 +98,7 @@ dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, de
 
 ## Exploratory Analysis and Visualization
 
-DESeq2 offers transformations for count data that stabilize the variance across the mean.It minimizes differences between samples for rows with small counts, and normalizes with respect to library size. One such transformation is the regularized-logarithm transformation or rlog2. Another transformation that similarly improves distance calculation across samples, the variance stabilizing transformation.For data sets with larger sample size, the variance stabilizing transformation will be much faster to compute.The two transformations (rlog and VST) are provided for applications other than differential testing.Raw counts work better for differential expression analysis since deseq2 has inbuild normalization.
+DESeq2 offers transformations for count data that stabilize the variance across the mean. It minimizes differences between samples for rows with small counts, and normalizes with respect to library size. One such transformation is the regularized-logarithm transformation or rlog2. Another transformation that similarly improves distance calculation across samples, the variance stabilizing transformation. For data sets with larger sample size, the variance stabilizing transformation will be much faster to compute. The two transformations (rlog and VST) are provided for applications other than differential testing. Raw counts work better for differential expression analysis since deseq2 has inbuild normalization. Using rlog transformation in this case.
 
 ```{r}
 #| warning: false
@@ -100,33 +106,31 @@ DESeq2 offers transformations for count data that stabilize the variance across 
 rld <- rlog(dds, blind=TRUE)
 ```
 
-**PCA Plot**
+### PCA Plot
 
-A way to visualize sample-to-sample distances is principal components analysis (PCA). In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
+Principal Components Analysis (PCA) visualizes sample-to-sample distances . In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
 
 ```{r}
 #| warning: false
 #| label: fig-pcaplot
 #| fig-cap: PCA Plot of Sample Distances
-#| fig-width: 6
-#| fig-height: 3.5
+
 pca <-plotPCA(rld, intgroup="group")
 pca
 
 ```
 
-In @fig-pcaplot, We can see the distance between the samples gene expression, find out the reasons for clustering of samples , investigate if there are any batch effects and add them in deseq2 while modelling.PCA is also useful to remove the outlier samples for the downstream analysis .
+In @fig-pcaplot, We can see the distance between the  gene expression of samples, investigate  the reasons for clustering of samples and if there are any batch effects and add them in deseq2 while modelling if present. PCA is also useful to remove the outlier samples for the downstream analysis .
 
-**Heatmap**
+### 2.Heatmap
 
 Sample - sample distance can be viewed in Heatmap also. A heatmap of this distance matrix gives us an overview over similarities and dissimilarities between samples. We have to provide a hierarchical clustering hc to the heatmap function based on the sample distances, or else the heatmap function would calculate a clustering based on the distances between the rows/columns of the distance matrix.
 
 ```{r}
 #| warning: false
-#| label: fig-heatmap
+#| label: fig-heatmap_samples
 #| fig-cap: Heatmap Plot of Sample Distances
-#| fig-width: 6
-#| fig-height: 3.5
+
 rld_mat <- assay(rld) 
 rld_cor <- cor(rld_mat) 
 samples_initial<- read.delim("./data/samples.tsv")
@@ -141,24 +145,25 @@ heatmap
 
 ```
 
-@fig-heatmap helps to find out the relation between the samples,clustering of samples and reasons behind it. PCA plots can be verified based on the results from the heatmap.
+@fig-heatmap_samples helps to find out the relation between the samples,clustering of samples and reasons behind it. PCA plots can be verified based on the results from the heatmap. Use the annotations on top for better analysis of data.
 
-## Differential expression analysis
+## Differential Expression Analysis
 
-We can run the differential expression pipeline on the raw counts with a single call to the function DESeq.This function will print out a message for the various steps it performs.The various steps includes:
+We can run the differential expression pipeline on the raw counts with a single call to the function DESeq. This function will print out a message for the various steps it performs. The various steps includes:
 
-1. The estimation of size factors, controlling for differences in the counts due varying sequencing depth of the samples.
+1.  The estimation of size factors, controlling for differences in the counts due varying sequencing depth of the samples.
 
-2. The estimation of dispersion values. The dispersion parameter captures how much the counts for the samples will vary around an expected value. Note that the expected value takes into consideration the sequencing depth and differences that can be attributed to variables in the design formula.
+2.  The estimation of dispersion values. The dispersion parameter captures how much the counts for the samples will vary around an expected value. Note that the expected value takes into consideration the sequencing depth and differences that can be attributed to variables in the design formula.
 
-3. Fitting a final generalized linear model using the size factors and dispersion values estimated above, which gives estimates of the log fold changes.
+3.  Fitting a final generalized linear model using the size factors and dispersion values estimated above, which gives estimates of the log fold changes.
 
+### Constructing the DESeqDataSet object and applying DESeq function on it
 
 ```{r}
 #| warning: false
-#DESEQ2 with condition and layout as factors 
+# Construct the DESeqDataSet object with condition and sequencing type as factors
 dds_seq <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, design = ~type + condition) 
-dds_seq
+
 #Saving the dds object as rds in results directory
 saveRDS(dds_seq,"./results/deseq2/dds.rds")
 
@@ -170,35 +175,60 @@ dds_seq <- dds_seq[keep, ]
 dds_seq <- DESeq(dds_seq)
 
 ```
+
+### Building the results table
+
 Calling results without any arguments will extract the estimated log2 fold changes and p values for the last variable in the design formula.This comparison is printed at the top of the output.
 
-
 ```{r}
-#Building the results table
+
 res <- results(dds_seq, contrast = c("condition",  "treated", "untreated"))
+```
+
+Now lets have a glance of the results table constructed:
+```{r}
 res
-#res  carries metadata with information on the meaning of the columns
+```
+
+res carries metadata with information on the meaning of the columns 
+```{r} 
+
 mcols(res, use.names = TRUE)
 ```
-Lets have a look at what each column means :
-1. Base Mean :  average of the normalized count values, dividing by size factors, taken over all samples in the DESeqDataSet
 
-2. log2FoldChange :It is the effect size estimate. It tells us how much the gene’s expression seems to have changed due to the factor. This value is reported on a logarithmic scale to base 2.
+Lets have a look at what each column means : 
 
-3. lfcSE :  the standard error estimate for the log2 fold change estimate.
 
-4. pvalue :  result of hypothesis test for each gene is reported as a p value.For example, the set of genes with adjusted p value less than 0.1 should contain no more than 10% false positives.
+1.  Base Mean : average of the normalized count values, dividing by size factors, taken over all samples in the DESeqDataSet
 
-#summarizing the results which will report some additional information
+2.  log2FoldChange : It is the effect size estimate. It tells us how much the gene's expression seems to have changed due to the factor. This value is reported on a logarithmic scale to base 2.
+
+3.  lfcSE : the standard error estimate for the log2 fold change estimate.
+
+4.  stat : For the Wald test, stat is the Wald statistic
+
+5.  pvalue : result of hypothesis test for each gene is reported as a p value.For example, the set of genes with adjusted p value less than 0.1 should contain no more than 10% false positives.
+
+6.  adjusted p value : satisfy the property that thresholding at a specific value defines a set of tests (one for each gene) with a bounded false discovery rate (FDR), typically a useful metric for assessing which genes to target for further analysis
+
+
+### Summarizing the results
+Summarizing the results which will report some additional information
+```{r}
 summary(res)
 ```
 
-##Annotating to other names-entrez/gene symbol
+### Annotating to other names-entrez/gene symbol
+
+Our result table so far only contains information about Ensembl gene IDs, but alternative gene names may be more informative for analysis. Bioconductor's annotation packages help with mapping various ID schemes to each other.
+
+Using the mapIds function to add individual columns to our results table. Providing the row names of our results table as a key, and specify that keytype=ENSEMBL. The column argument tells the mapIds function which information we want, and the multiVals argument tells the function what to do if there are multiple possible values for a single input value. Here just giving us back the first one that occurs in the database.To add the gene symbol and Entrez ID, we called mapIds twice.
 
 ```{r}
 #| warning: false
-columns(org.Dm.eg.db)
-
+#To get a list of all available key types
+#columns(org.Dm.eg.db)
+ 
 #mapping ensembl id to enrez id and gene symbol using mapIds
 ids <- strsplit(rownames(res), ".", fixed = TRUE)
 ids <- sapply(ids, head, n = 1)
@@ -219,181 +249,135 @@ res$entrez <- mapIds(
   multiVals = "first"
 )
 # Output the first few lines of the results table
-head(res)
 
-#writing the results to csv files
+```
+
+Lets have a look at the new results table with additional columns we would love to see:
+
+```{r}
+head(res)
+```
+
+The results table can be further reduced to a much better version by giving strict padj and log2FoldChange thresholds
+
+```{r}
+#Exporting  results 
 write.csv(as.data.frame(res), file = "./results/deseq2/Treated-Untreated.results.csv")
 
 #filtering the significant genes with padj < 0.05
 res_sig <- subset(res, padj < 0.05)
 
-#filtering again the significant genes with lfc>1 from res_sig
+#filtering again the significant genes with l2fc>1 from res_sig
 res_lfc<- subset(res_sig, abs(log2FoldChange) > 1)
 res_lfc_new<-as.data.frame(res_lfc) 
-res_lfc_new
-DT::datatable(res_lfc_new)
+
 write.csv(as.data.frame(res_sig), file = "./results/deseq2/Treated-Untreated.signif.csv")
 write.csv(as.data.frame(res_lfc), file = "./results/deseq2/Treated-Untreated.signif-lfc.csv")
 
 #saving the final results to rds object
 saveRDS(res_lfc,"./results/deseq2/sign_results.rds")
-
+```
+Here is the shortlisted differentially expressed significant genes:
+```{r}
+DT::datatable(res_lfc_new)
 ```
 
-##Plotting of DESEQ2 results
+### Plotting of DESEQ2 results
+
+#### plotCounts
+
+To visualize the counts for a particular gene
 
 ```{r}
-#getting the top genes
 #| warning: false
+#| label: fig-plotCounts
+#| fig-cap: plotCounts of top gene
+#getting the top gene
 top <- rownames(res)[which.min(res$padj)]
 top_gene<-res$symbol[[top]] 
-top_gene
-
-#plotCounts
-
+#plotCounts for the data object 
 plotCounts(dds_seq, gene = top, intgroup = "condition", main = top_gene) 
+```
 
-#plotMA
+In @fig-plotCounts, We can visualize the normalized counts over both conditions. It helps us to infer the level of difference in gene expression in different conditions. Hence , we can say if there is no or up or down regulation of a gene in a particular condition.
 
-plotMA(res,main ="MA Plot of Differentially Expressed genes")
+#### plotMA
+
+An MA-plot provides a useful overview for an experiment with a two-group comparison.
+
+```{r}
+#| warning: false
+#| label: fig-plotMA
+#| fig-cap: An MA-plot of changes induced by treatment.
+
+
+plotMA(res)
 abline(h=c(-1,1), col="dodgerblue", lwd=2)
 legend(1e+04, 3, legend=c("Non Sign", "Sign"), 
        fill = c("grey","blue")) 
+```
 
+In @fig-plotMA ,The log2 fold change for a particular comparison is plotted on the y-axis and the average of the counts normalized by size factor is shown on the x-axis Each gene is represented with a dot. Genes with an adjusted p value below a threshold (here 0.1, the default) are shown in blue.
 
+#### Volcanoplot
 
-#some extra plots:
-#volcanoplot
+A volcano plot is a type of scatterplot that shows statistical significance (P value) versus magnitude of change (fold change). It enables quick visual identification of genes with large fold changes that are also statistically significant. These may be the most biologically significant genes. In a volcano plot, the most up-regulated genes are towards the right, the most down-regulated genes are towards the left, and the most statistically significant genes are towards the top.
+
+```{r}
+#| warning: false
+#| label: fig-volcano
+#| fig-cap: Volcano Plot of Differentially Expressed genes
+
 
 EnhancedVolcano(res,
                 lab = res$symbol,
                 x = 'log2FoldChange',
                 y = 'pvalue',
-                title = 'Volcano Plot of Differentially Expressed genes',
                 pCutoff = 10e-32,
                 FCcutoff = 2,
                 pointSize = 3.0,
                 labSize = 6.0 ,
                 )
+```
+
+In @fig-volcano, differentially expressed genes which are statistically significant are labelled in red color. The pCutoff and FCcutoff can also be changed based on the needs.
+
+#### Heatmap
+
+Since the clustering is only relevant for genes that actually carry a signal, one usually would only cluster a subset of the most highly variable genes. Here, I selected the 20 genes with the highest variance across samples. Working with the rlog transformed counts:
+
+```{r}
+#| warning: false
+#| label: fig-heatmap
+#| fig-cap: Heatmap of relative rlog-transformed values across samples
 
 
-#heatmap
-
-
-#genes_nobatch<-order(res_lfc_nobatch$log2FoldChange, decreasing=TRUE)[1:20]
-#res_lfc<-res_lfc[complete.cases(res_lfc), ]
-#rownames(res_lfc) <- res_lfc$symbol
-
-
+#ordering the genes based on l2fc,retrieving the first 20 gene rownames
 genes <- order(res_lfc$log2FoldChange, decreasing=TRUE)[1:20]
-genes
 gene_names<-rownames(res_lfc)[genes]
 
-
-
+#getting the gene symbols of those 20 rownames
 names<-res_lfc$symbol[gene_names]
-names
+#making it into a dataframe
 names<-data.frame(names)
 
-
-
-
-colnames(assay(rld)[gene_names,])
+# to see the actual data,the fragment counts,using the assay function.
+data<-colnames(assay(rld)[gene_names,])
+#cbinding the gene symbols along with assay(rld)
 new<-cbind(names,assay(rld)[gene_names,])
-#rownames(new)<-new$names
 df <- subset (new, select = -names)
 
-
-
-
+#for annotations on condition and sequencing type
 annot_col <- samples_initial%>%
   column_to_rownames('sample') %>%
   dplyr::select(condition,type) %>%
   as.data.frame()
 
-
-
-
-#assay(vsd)[genes, ]
-
-
+#using pheatmap for heatmap
 pheatmap(df, cluster_rows=TRUE, labels_row = names$names,legend_breaks = -2:2,
          cluster_cols=FALSE, annotation_col=annot_col, main= "Heatmap of expression of genes",scale = "row")
          
 
 ```
 
-#\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*GSEA\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* #Go
-
-```{r}
-
-
-
-#| warning: false
-#reading in data from deseq2
-df = read.csv("./results/deseq2/Treated-Untreated.signif-lfc.csv", header=TRUE)
-
-# we want the log2 fold change 
-original_gene_list <- df$log2FoldChange
-
-# name the vector
-df$X<-df$symbol
-names(original_gene_list) <- df$X
-
-# omit any NA values 
-gene_list<-na.omit(original_gene_list)
-
-# sort the list in decreasing order (required for clusterProfiler)
-gene_list = sort(gene_list, decreasing = TRUE)
-gene_list
-
-keytypes(org.Dm.eg.db)
-
-gse <- gseGO(geneList=gene_list, 
-             ont ="ALL", 
-             keyType = "SYMBOL", 
-             nPerm = 10000, 
-             minGSSize = 3, 
-             maxGSSize = 800, 
-             pvalueCutoff = 0.05, 
-             verbose = TRUE, 
-             OrgDb = org.Dm.eg.db, 
-             pAdjustMethod = "none")
-#dotplot
-require(DOSE)
-
-dotplot(gse, showCategory=10, split=".sign") + facet_grid(.~.sign)
-
-
-#enrichment map
-
-gse_emap<-pairwise_termsim(gse) 
-
-emapplot(gse_emap, showCategory = 10)
-
-
-#category net plot
-# categorySize can be either 'pvalue' or 'geneNum'
-
-cnetplot(gse, categorySize="pvalue", foldChange=gene_list, showCategory = 10)
-
-#ridgeplot
-
-ridgeplot(gse,showCategory = 15) + labs(x = "enrichment distribution") + theme_ridges(font_size = 10,  line_size = 3)
-
-#gseaplot
-
-gseaplot(gse, by = "all", title = gse$Description[1], geneSetID = 1)
-
-#pubmed
-
-terms <- gse$Description[1:10]
-pmcplot(terms, 2012:2022, proportion=FALSE)
-
-
-
-
-#add
-#add
-
-```
+In @fig-heatmap, annotation information are shown with colored bars at the top. It helps us to find out the over expression or under expression of top selected genes in different samples. The clustering of gene expression can be studied using the annotations provided.
