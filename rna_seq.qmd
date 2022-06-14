@@ -457,7 +457,13 @@ parameters <- list(
     ),
     list(
         Parameter = names(params[6]),
-        Value = names(params[[6]]),
+        Value = params[[6]],
+        Description = "Colname in the metadata used as factor for Differential Expression "
+    ),
+    
+    list(
+        Parameter = names(params[7]),
+        Value = names(params[[7]]),
         Description = "Contrasts for DESeq2 analysis"
     )
    
