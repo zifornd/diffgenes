@@ -60,7 +60,8 @@ library(htmlwidgets)
 library(DT)
 library(SummarizedExperiment)
 library(workflowr)
-
+library(knitr)
+#library(phantomjs)
 
 ```
 
@@ -199,8 +200,12 @@ dds <- DESeq(dds)
 
 This section contains the results table which has the differentially expressed genes over the particular contrast after deseq analysis.
 
+:::{.panel-tabset}
 ```{r}
+#| results: "asis"
+#| echo: false
 #| warning:  false
+
 contrasts <- names(params$contrasts)
 
 for (contrast in contrasts){
@@ -208,11 +213,14 @@ for (contrast in contrasts){
   groups <- params$contrasts[[contrast]]
 
   res <- results(dds, contrast = c(params$colname, groups[1], groups[2]))
-
+  res_table<-as.data.frame(res)
+  cat("###",contrast,"\n")
+  cat(knitr::knit_print(DT::datatable(res_table, height = "20%", options = list(DT.warn.size = FALSE))))
+  cat("\n\n")
 }
-res_table<-as.data.frame(res)
-DT::datatable(res_table, options = list(DT.warn.size = FALSE))
+
 ```
+:::
 
 Metadata with information on the meaning of the columns is given below:
 
