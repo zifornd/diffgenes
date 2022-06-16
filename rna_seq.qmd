@@ -20,21 +20,28 @@ params:
     - "./data/genes.tsv"
   design:
     - "~type + condition"
+  design_2:
+    - "~group"
   organism: 
     - org.Dm.eg.db
   colname:
     - "condition"
+  colname_2:
+    - "group"
   contrasts:
     value:
       Treated_vs_Untreated: ["treated", "untreated"]
+    
+  contrasts_2:
+    value:
+      treated_single_vs_treated_paired: ["treated.single-read", "untreated.single-read"]
+      untreated_paired_vs_treated_paired: ["treated.paired-end", "untreated.paired-end"]
 ---
-
-## Installation and loading of required packages
-
-Installing the required packages and loading them  for bulk RNA Seq Analysis.
 
 ```{r}
 #| warning: false
+#| include: false
+# Installing the required packages and loading them  for Bulk RNA Seq Analysis.
 library(dplyr)
 library(textshape)
 library(ggplot2)
@@ -61,7 +68,8 @@ library(DT)
 library(SummarizedExperiment)
 library(workflowr)
 library(knitr)
-#library(phantomjs)
+DT::datatable(matrix())
+options(DT.warn.size=FALSE)
 
 ```
 
@@ -71,10 +79,10 @@ library(knitr)
 #| warning:  false
 samples <- read.delim(params$sample_data)
 #sample table edits to get the required format
-samples$group <- paste(samples$condition ,"_", samples$type)
+samples$group <- paste(samples$condition ,samples$type, sep = ".")
 ```
 
-This section contains the sample metadata. Sample name , condition and type or batch effect is present in the table.
+This section contains the sample metadata. Sample name , condition and type or batch effect if present should be  present in the table.
 
 ```{r}
 #| warning:  false
@@ -115,6 +123,10 @@ stopifnot("Sample order is not the same in the sample table and the counts matri
 #making a dds object using counts matrix and samples metadata
 dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, 
                               design = as.formula(params$design) )
+
+dds_2 <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, 
+                              design = as.formula(params$design_2) )
+
 
 ```
 
@@ -171,13 +183,13 @@ heatmap
 
 ## Differential Expression Analysis
 
-The differential expression analysis using DESeq on DESeqDataSet object for Treated Vs Untreated condition. The various steps of DESeq includes:
+The differential expression analysis using DESeq on DESeqDataSet object for Treated Vs Untreated condition. The brief steps of DESeq includes:
 
 1.  The estimation of size factors
 
 2.  The estimation of dispersion values
 
-3.  Fitting a final generalized linear model
+3.  Fitting a final generalized linear model estimated above, which gives estimates of the log fold changes.
 
 ```{r}
 #| warning: false
@@ -191,36 +203,71 @@ saveRDS(dds,"./results/deseq2/dds.rds")
 keep <- rowSums(counts(dds)) >= 10
 dds <- dds[keep, ]
 
+keep_2 <- rowSums(counts(dds_2)) >= 10
+dds_2 <- dds_2[keep_2, ]
+
+
 #deseq2 analysis using DESeq function
 dds <- DESeq(dds)
+dds_2<-DESeq(dds_2)
 
 ```
 
 ### Results table
 
-This section contains the results table which has the differentially expressed genes over the particular contrast after deseq analysis.
+This section contains the results table which has the differentially expressed genes over the particular contrast after Differential Expression Analysis.
+
+#### Contrast factor - Condition
 
 :::{.panel-tabset}
 ```{r}
 #| results: "asis"
-#| echo: false
 #| warning:  false
 
-contrasts <- names(params$contrasts)
+contrasts_1 <- names(params$contrasts)
 
-for (contrast in contrasts){
+for (contrast in contrasts_1){
 
   groups <- params$contrasts[[contrast]]
 
   res <- results(dds, contrast = c(params$colname, groups[1], groups[2]))
   res_table<-as.data.frame(res)
   cat("###",contrast,"\n")
-  cat(knitr::knit_print(DT::datatable(res_table, height = "20%", options = list(DT.warn.size = FALSE))))
+  cat(knitr::knit_print(DT::datatable(res_table, height = "20%", width = "100%", options = list(scrollX = TRUE))))
   cat("\n\n")
 }
 
 ```
 :::
+
+
+#### Contrast factor - Group 
+
+:::{.panel-tabset}
+```{r}
+#| results: "asis"
+#| warning:  false
+
+contrasts_2 <- names(params$contrasts_2)
+
+
+for (contrast in contrasts_2){
+
+  groups_2 <- params$contrasts_2[[contrast]]
+
+  res_2 <- results(dds_2, contrast = c(params$colname_2, groups_2[1], groups_2[2]))
+  res_table_2<-as.data.frame(res_2)
+  cat("###",contrast,"\n")
+  cat(knitr::knit_print(DT::datatable(res_table_2, height = "20%", width = "100%", options = list(scrollX = TRUE))))
+  cat("\n\n")
+
+}
+
+```
+:::
+
+
+
 
 Metadata with information on the meaning of the columns is given below:
 
@@ -247,7 +294,7 @@ Lets have a look at what each column means :
 
 ### Summarizing the results
 
-This section contains summary of the results which will give an idea about the up regulated and down regulated number of genes for the particluar contrast.
+This section contains summary of the results which will give an idea about the up regulated and down regulated number of genes for the particular contrast - Treated_vs_Untreated.
 
 ```{r}
 #| warning:  false
@@ -323,7 +370,7 @@ write.csv(as.data.frame(res_lfc), file = "./results/deseq2/Treated-Untreated.sig
 saveRDS(res_lfc,"./results/deseq2/sign_results.rds")
 ```
 
-Here is the shortlisted differentially expressed significant genes with padj < 0.05 and abs(log2FoldChange) > 1) :
+Here is the shortlisted differentially expressed significant genes for Treated_vs_Untreated with padj < 0.05 and abs(log2FoldChange) > 1) :
 
 ```{r}
 #| warning:  false
@@ -456,24 +503,40 @@ parameters <- list(
     list(
         Parameter = names(params[4]),
         Value = params[[4]],
-        Description = "The design for the Differntial Expression Analysis"
+        Description = "The design for the Differential Expression Analysis_1"
     ),
     list(
         Parameter = names(params[5]),
         Value = params[[5]],
-        Description = "Organism in the study "
+        Description = "The design for the Differential Expression Analysis_2"
     ),
     list(
         Parameter = names(params[6]),
         Value = params[[6]],
-        Description = "Colname in the metadata used as factor for Differential Expression "
+        Description = "Organism in the study"
     ),
     
     list(
         Parameter = names(params[7]),
-        Value = names(params[[7]]),
-        Description = "Contrasts for DESeq2 analysis"
+        Value = params[[7]],
+        Description = "Colname in the metadata used as factor for Differential Expression_1"
+    ),
+    list(
+        Parameter = names(params[8]),
+        Value = params[[8]],
+        Description = "Colname in the metadata used as factor for Differential Expression_2"
+    ),
+    list(
+        Parameter = names(params[9]),
+        Value = names(params$contrasts),
+        Description = "Contrasts for DESeq2 analysis_1"
+    ),
+    list(
+        Parameter = names(params[10]),
+        Value = names(params$contrasts_2),
+        Description = "Contrasts for DESeq2 analysis_2"
     )
+   
    
 )
 
