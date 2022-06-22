@@ -11,6 +11,8 @@ number-sections: true
 fig-cap-location: bottom
 execute:
   echo: false
+pre-render: data_validation.R
+post-render: output_validation.R
 params:
   sample_data:
     - "./data/samples.tsv"
@@ -20,22 +22,18 @@ params:
     - "./data/genes.tsv"
   design:
     - "~type + condition"
-  design_2:
-    - "~group"
   organism: 
     - org.Dm.eg.db
   colname:
     - "condition"
-  colname_2:
-    - "group"
   contrasts:
     value:
       Treated_vs_Untreated: ["treated", "untreated"]
-    
-  contrasts_2:
-    value:
-      treated_single_vs_treated_paired: ["treated.single-read", "untreated.single-read"]
-      untreated_paired_vs_treated_paired: ["treated.paired-end", "untreated.paired-end"]
+      
+  pCutoff_volcano:
+    - 10e-32
+  FCcutoff_volcano:
+    -  2
 ---
 
 ```{r}
@@ -43,30 +41,18 @@ params:
 #| include: false
 # Installing the required packages and loading them  for Bulk RNA Seq Analysis.
 library(dplyr)
-library(textshape)
-library(ggplot2)
 library(viridis)
-library(Rsubread)
 library(DESeq2)
 library(pheatmap)
 library(AnnotationDbi)
-library(org.Dm.eg.db)
+if (!require(params$organism, quietly = TRUE)) {
+  BiocManager::install(params$organism, update = FALSE, ask = FALSE)
+}
+library(params$organism, character.only = TRUE)
 library(EnhancedVolcano)
-library(clusterProfiler)
-library(enrichplot)
 library(ggplot2)
-library(ggridges)
-library(europepmc)
-library(pathview)
-library(biomaRt)
-library(dplyr)
 library(tidyverse)
-library(fgsea)
-library(ggnewscale)
-library(htmlwidgets)
 library(DT)
-library(SummarizedExperiment)
-library(workflowr)
 library(knitr)
 DT::datatable(matrix())
 options(DT.warn.size=FALSE)
@@ -78,14 +64,15 @@ options(DT.warn.size=FALSE)
 ```{r}
 #| warning:  false
 samples <- read.delim(params$sample_data)
-#sample table edits to get the required format
-samples$group <- paste(samples$condition ,samples$type, sep = ".")
+
 ```
 
-This section contains the sample metadata. Sample name , condition and type or batch effect if present should be  present in the table.
+This section contains the sample metadata. Sample name , condition and type or batch effect if present should be present in the table.
 
 ```{r}
 #| warning:  false
+
+#metadata
 DT::datatable(samples)
 ```
 
@@ -110,24 +97,17 @@ genes <- read.delim(params$genes_data)
 #reading the counts matrix
 Counts<- read.delim(params$counts_data)
 
-#data integration test for counts table to check whether no.of rows in counts is equal to gene annotation file
-stopifnot("number of rows in the gene annotation table is not the same in the counts,kindly check the data files! " = nrow(genes) == nrow(Counts))
+#writing the counts tsv file to results folder
+write.table(Counts, file = "./results/counts.tsv")
 
 countDataMatrix <- as.matrix(Counts[ , -1])
 rownames(countDataMatrix) <- Counts[ , 1]
-#data integrity tests for counts table to check the sample order in sample metadata and counts table is same 
-stopifnot("Sample order is not the same in the sample table and the counts matrix,Kindly check the data files!" = all(samples$sample == colnames(countDataMatrix)))
-
 
 
 #making a dds object using counts matrix and samples metadata
 dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, 
                               design = as.formula(params$design) )
-
-dds_2 <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, 
-                              design = as.formula(params$design_2) )
-
-
+dds
 ```
 
 ## Exploratory Analysis and Visualization
@@ -138,6 +118,9 @@ It is important to normalize the data before visualizing it and DESeq2 offers tr
 #| warning: false
 #rlog transformation for data visualization
 rld <- rlog(dds, blind=TRUE)
+#Saving the DESeqTransform object as rds in results directory
+saveRDS(rld,"./results/DESeqTransform.rds")
+
 ```
 
 ### PCA Plot
@@ -149,8 +132,13 @@ Principal Components Analysis (PCA) visualizes sample-to-sample distances . In t
 #| label: fig-pcaplot
 #| fig-cap: PCA Plot of Sample Distances
 
-pca <-plotPCA(rld, intgroup="group")
-pca
+pcaData <- plotPCA(rld, intgroup=c("condition", "type"), returnData=TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(PC1, PC2, color=condition, shape=type)) +
+  geom_point(size=3) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed()
 
 ```
 
@@ -166,11 +154,12 @@ Sample - sample distances can be viewed in Heatmap also. A heatmap of this dista
 #| fig-cap: Heatmap Plot of Sample Distances
 
 rld_mat <- assay(rld) 
+write.table(rld_mat, file="./results/logcounts.tsv", sep="\t", quote=F,   col.names=NA)
 rld_cor <- cor(rld_mat) 
 samples_initial<- read.delim(params$sample_data)
 annot_col <- samples_initial%>%
   column_to_rownames('sample') %>%
-  dplyr::select(type) %>%
+  dplyr::select(condition,type) %>%
   as.data.frame()
 
 heatmap<-pheatmap(mat=rld_cor,main = "Heatmap - Sample Distances",color = viridis(n=256),
@@ -180,6 +169,53 @@ heatmap
 ```
 
 @fig-heatmap_distance shows the relation between the samples,clustering of samples and reasons behind it. PCA plots can be verified based on the results from the heatmap. Use the annotations on top for better interpretation of the data.
+
+### 3.MDS Plot
+
+```{r}
+#| label: fig-mdsplot
+#| fig-cap: MDS Plot 
+
+sampleDists <- dist( t( assay(rld) ) )
+sampleDists
+sampleDistMatrix <- as.matrix( sampleDists )
+sampleDistMatrix
+rownames(sampleDistMatrix) <- paste(samples$condition, samples$type, sep="-" )
+colnames(sampleDistMatrix) <- NULL
+sampleDistMatrix
+mds <- data.frame(cmdscale(sampleDistMatrix))
+mds
+mds <- cbind(mds, as.data.frame(colData(rld)))
+mds
+ggplot(mds, aes(X1,X2,color=condition,shape=type)) + geom_point(size=3)
+```
+@fig-mdsplot
+
+### 4.Boxplot of gene expression values
+
+```{r}
+#| label: fig-boxplot
+#| fig-cap: boxplot
+
+counts <- rld_mat
+samples <- colData(dds)
+
+data <- stack(counts)
+
+colnames(data) <- c("gene", "sample", "count")
+data <- merge(data, samples, by = "sample")
+data <- as.data.frame(data)
+
+
+ggplot(data, aes(sample, count, fill = condition)) +
+  geom_boxplot() +
+  facet_wrap(~ type, scales = "free_x")
+
+
+
+
+```
+@fig-boxplot
 
 ## Differential Expression Analysis
 
@@ -194,22 +230,20 @@ The differential expression analysis using DESeq on DESeqDataSet object for Trea
 ```{r}
 #| warning: false
 
-dir.create("./results")
-dir.create("./results/deseq2")
+#dir.create("./results")
+#dir.create("./results/deseq2")
 #Saving the dds object as rds in results directory
-saveRDS(dds,"./results/deseq2/dds.rds")
-
-#filtering the records by condition
-keep <- rowSums(counts(dds)) >= 10
-dds <- dds[keep, ]
-
-keep_2 <- rowSums(counts(dds_2)) >= 10
-dds_2 <- dds_2[keep_2, ]
+saveRDS(dds,"./results/DESeqDataSet.rds")
 
 
 #deseq2 analysis using DESeq function
 dds <- DESeq(dds)
-dds_2<-DESeq(dds_2)
+dds
+
+#constructing normalized counts
+normalized_counts <- counts(dds, normalized=TRUE)
+#writing normalized counts to tsv file
+write.table(normalized_counts, file="./results/normcounts.tsv", sep="\t", quote=F,   col.names=NA)
 
 ```
 
@@ -219,7 +253,7 @@ This section contains the results table which has the differentially expressed g
 
 #### Contrast factor - Condition
 
-:::{.panel-tabset}
+::: panel-tabset
 ```{r}
 #| results: "asis"
 #| warning:  false
@@ -231,43 +265,36 @@ for (contrast in contrasts_1){
   groups <- params$contrasts[[contrast]]
 
   res <- results(dds, contrast = c(params$colname, groups[1], groups[2]))
+  #mapping ensembl id to enrez id and gene symbol using mapIds
+  ids <- strsplit(rownames(res), ".", fixed = TRUE)
+  ids <- sapply(ids, head, n = 1)
+  org<-eval(parse(text=params$organism))
+  #for symbol
+  res$symbol <- mapIds(
+    x = org,
+    keys = ids,
+    column = "SYMBOL",
+    keytype = "ENSEMBL",
+    multiVals = "first"
+  )
   res_table<-as.data.frame(res)
+  
+  #writing normalized counts to tsv file
+  write.table(res_table, file=paste("./results/DESeqResults",contrast,".tsv",sep="_"), sep="\t", quote=F,             col.names=NA)
+  
+  saveRDS(res, file=paste("./results/DESeqResults",contrast,".rds",sep="_"))
+  
   cat("###",contrast,"\n")
-  cat(knitr::knit_print(DT::datatable(res_table, height = "20%", width = "100%", options = list(scrollX = TRUE))))
+  table<-DT::datatable(res_table, height = "20%", width = "100%", options = list(scrollX = TRUE)) %>%
+    formatRound(columns = c("baseMean","log2FoldChange","lfcSE","stat"),digits = 3) %>%
+     formatRound(columns = c("pvalue", "padj"),digits = 1)
+  cat(knitr::knit_print(table))
+    
   cat("\n\n")
 }
 
 ```
 :::
-
-
-#### Contrast factor - Group 
-
-:::{.panel-tabset}
-```{r}
-#| results: "asis"
-#| warning:  false
-
-contrasts_2 <- names(params$contrasts_2)
-
-
-for (contrast in contrasts_2){
-
-  groups_2 <- params$contrasts_2[[contrast]]
-
-  res_2 <- results(dds_2, contrast = c(params$colname_2, groups_2[1], groups_2[2]))
-  res_table_2<-as.data.frame(res_2)
-  cat("###",contrast,"\n")
-  cat(knitr::knit_print(DT::datatable(res_table_2, height = "20%", width = "100%", options = list(scrollX = TRUE))))
-  cat("\n\n")
-
-}
-
-```
-:::
-
-
-
 
 Metadata with information on the meaning of the columns is given below:
 
@@ -292,107 +319,17 @@ Lets have a look at what each column means :
 
 6.  adjusted p value : satisfy the property that thresholding at a specific value defines a set of tests (one for each gene) with a bounded false discovery rate (FDR), typically a useful metric for assessing which genes to target for further analysis
 
-### Summarizing the results
-
-This section contains summary of the results which will give an idea about the up regulated and down regulated number of genes for the particular contrast - Treated_vs_Untreated.
-
-```{r}
-#| warning:  false
-summary(res)
-```
-
 ### Annotating to other names-entrez/gene symbol
 
 Our result table so far only contains information about Ensembl gene IDs, but alternative gene names may be more informative for analysis. Bioconductor's annotation packages help with mapping various ID schemes to each other.
 
 Using the mapIds function to add individual columns to our results table. Providing the row names of our results table as a key, and specify that keytype=ENSEMBL. The column argument tells the mapIds function which information we want, and the multiVals argument tells the function what to do if there are multiple possible values for a single input value. Here just giving us back the first one that occurs in the database.To add the gene symbol and Entrez ID, we called mapIds twice.
 
-```{r}
-#| warning: false
-#To get a list of all available key types
-#columns(org.Dm.eg.db)
- 
-#mapping ensembl id to enrez id and gene symbol using mapIds
-ids <- strsplit(rownames(res), ".", fixed = TRUE)
-ids <- sapply(ids, head, n = 1)
-#org<-noquote(params$organism)
-#org<-print(params$organism, quote=FALSE)
-
-org<-eval(parse(text=params$organism))
-#for symbol
-res$symbol <- mapIds(
-  x = org,
-  keys = ids,
-  column = "SYMBOL",
-  keytype = "ENSEMBL",
-  multiVals = "first"
-)
-#for entrez id
-res$entrez <- mapIds(
-  x = org,
-  keys = ids,
-  column = "ENTREZID",
-  keytype = "ENSEMBL",
-  multiVals = "first"
-)
-# Output the first few lines of the results table
-
-```
-
 Lets have a look at the new results table with additional columns we would love to see:
-
-```{r}
-#| warning:  false
-res_annotated<-as.data.frame(res)
-DT::datatable(head(res_annotated))
-
-```
 
 The results table can be further reduced to a much better version by giving strict padj and log2FoldChange thresholds
 
-```{r}
-#| warning:  false
-
-#Exporting  results 
-write.csv(as.data.frame(res), file = "./results/deseq2/Treated-Untreated.results.csv")
-
-#filtering the significant genes with padj < 0.05
-res_sig <- subset(res, padj < 0.05)
-
-#filtering again the significant genes with l2fc>1 from res_sig
-res_lfc<- subset(res_sig, abs(log2FoldChange) > 1)
-res_lfc_new<-as.data.frame(res_lfc) 
-
-write.csv(as.data.frame(res_sig), file = "./results/deseq2/Treated-Untreated.signif.csv")
-write.csv(as.data.frame(res_lfc), file = "./results/deseq2/Treated-Untreated.signif-lfc.csv")
-
-#saving the final results to rds object
-saveRDS(res_lfc,"./results/deseq2/sign_results.rds")
-```
-
-Here is the shortlisted differentially expressed significant genes for Treated_vs_Untreated with padj < 0.05 and abs(log2FoldChange) > 1) :
-
-```{r}
-#| warning:  false
-DT::datatable(res_lfc_new)
-```
-
 ### Plotting of DESEQ2 results
-
-#### plotCounts
-
-Visualizing the counts for a particular gene
-
-```{r}
-#| warning: false
-#| label: fig-plotCounts
-#| fig-cap: plotCounts of top gene
-#getting the top gene
-top <- rownames(res)[which.min(res$padj)]
-top_gene<-res$symbol[[top]] 
-#plotCounts for the data object 
-plotCounts(dds, gene = top, intgroup = "condition", main = top_gene) 
-```
 
 @fig-plotCounts, visualizing the normalized counts over both conditions. It helps us to infer the level of difference in gene expression in different conditions. Hence , we can say if there is no or up or down regulation of a gene in a particular condition.
 
@@ -428,8 +365,8 @@ EnhancedVolcano(res,
                 lab = res$symbol,
                 x = 'log2FoldChange',
                 y = 'pvalue',
-                pCutoff = 10e-32,
-                FCcutoff = 2,
+                pCutoff = as.numeric(params$pCutoff_volcano),
+                FCcutoff = as.numeric(params$FCcutoff_volcano),
                 pointSize = 3.0,
                 labSize = 6.0 ,
                 )
@@ -447,19 +384,21 @@ Since the clustering is only relevant for genes that actually carry a signal, on
 #| fig-cap: Heatmap of relative rlog-transformed values across samples
 
 
+rld_downstream <- rlog(dds, blind=FALSE)
+
 #ordering the genes based on l2fc,retrieving the first 20 gene rownames
-genes <- order(res_lfc$log2FoldChange, decreasing=TRUE)[1:20]
-gene_names<-rownames(res_lfc)[genes]
+genes <- order(res$log2FoldChange, decreasing=TRUE)[1:20]
+gene_names<-rownames(res)[genes]
 
 #getting the gene symbols of those 20 rownames
-names<-res_lfc$symbol[gene_names]
+names<-res$symbol[gene_names]
 #making it into a dataframe
 names<-data.frame(names)
 
 # to see the actual data,the fragment counts,using the assay function.
-data<-colnames(assay(rld)[gene_names,])
+data<-colnames(assay(rld_downstream)[gene_names,])
 #cbinding the gene symbols along with assay(rld)
-new<-cbind(names,assay(rld)[gene_names,])
+new<-cbind(names,assay(rld_downstream)[gene_names,])
 df <- subset (new, select = -names)
 
 #for annotations on condition and sequencing type
@@ -547,27 +486,103 @@ DT::datatable(jsonlite::fromJSON(parameters))
 
 ### Output Files
 
-| Output File                 | Link                                                                   |
-|----------------------------------------------|--------------------------|
-| dds rds                     | [dds](./results/deseq2/dds.rds)                                        |
-| DESeq2 results              | [Results](./results/deseq2/Treated-Untreated.results.csv)              |
-| DESEQ2 results filtered     | [Final Results](./results/deseq2/Treated-Untreated.signif-lfc.csv)     |
-| DESEQ2 results filtered rds | [Final_rds](./results/deseq2/sign_results.rds)                         |
-| PCA Plot                    | [PCA](./rna_seq_files/figure-html/fig-pcaplot-1.png)                   |
-| Heatmap_distance            | [Heatmap_dist](./rna_seq_files/figure-html/fig-heatmap_distance-1.png) |
-| plotCounts                  | [plotCounts](./rna_seq_files/figure-html/fig-plotCounts-1.png)         |
-| MA plot                     | [MA](./rna_seq_files/figure-html/fig-plotMA-1.png)                     |
-| Volcano Plot                | [Volcano](./rna_seq_files/figure-html/fig-volcano-1.png)               |
-| Heatmap_geneexpression      | [Heatmap_geneexp](./rna_seq_files/figure-html/fig-heatmap-1.png)       |
+```{r}
+#| warning:  false
 
-### Session info
+output_files <- list(
+    list(
+        File = "counts",
+        Link = "<a href='./results/counts.tsv'> counts </a>",
+        Description = "counts file"
+        ),
+    list(
+        File = "normalized counts",
+        Link = "<a href='./results/normcounts.tsv'> norm_counts </a>",
+        Description = "normalized counts file"
+        ),
+    list(
+      File = "log counts",
+        Link = "<a href='./results/logcounts.tsv'> log_counts </a>",
+        Description = "log counts file"
+    ),
+    list(
+      File = "DESeqDataSet.rds",
+        Link = "<a href='./results/DESeqDataSet.rds'> dds </a>",
+        Description = "dds"
+    ),
+    list(
+      File = "DESeqTransform.rds",
+        Link = "<a href='./results/DESeqTransform.rds'> tranform_dds </a>",
+        Description = "tranformed dds"
+    ),
+    list(
+      File = "DESeqResults_Treated_vs_Untreated_.rds",
+        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.rds'> tranform_dds </a>",
+        Description = "rds of treated vs untreated"
+    ),
+    list(
+      File = "DESeqResults_Treated_vs_Untreated_.tsv",
+        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.tsv'> tranform_dds </a>",
+        Description = "tsv of treated vs untreated"
+    ),
+    list(
+      File = "pca plot",
+        Link = "<a href='./rna_seq_files/figure-html/fig-pcaplot-1.png> tranform_dds </a>",
+        Description = "pca"
+    ),
+    list(
+      File = "heatmap_dist",
+        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap_distance-1.png'> HEATMAP_DIST </a>",
+        Description = "heatmap_distance"
+    ),
+    list(
+      File = "mds_plot",
+        Link = "<a href='./rna_seq_files/figure-html/fig-mdsplot-1.png'> HEATMAP_DIST </a>",
+        Description = "mds plot"
+    ),
+    list(
+      File = "boxplot",
+        Link = "<a href='./rna_seq_files/figure-html/fig-boxplot-1.png'> HEATMAP_DIST </a>",
+        Description = "boxplot"
+    ),
+    
+    list(
+      File = "MA",
+        Link = "<a href='./rna_seq_files/figure-html/fig-plotMA-1.png'> MA </a>",
+        Description = "MA"
+    ),
+    list(
+      File = "VOLCANO",
+        Link = "<a href='./rna_seq_files/figure-html/fig-volcano-1.png'> VOLCANO </a>",
+        Description = "VOLCANO"
+    ),
+    list(
+      File = "heatmap",
+        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap-1.png'> HEATMAP </a>",
+        Description = "heatmap"
+    )
+    
+    
+    
+)
+
+output_files <- jsonlite::toJSON(output_files, pretty = TRUE)
+DT::datatable(jsonlite::fromJSON(output_files),escape = FALSE)
+
+```
+
+### Session Information
+
 <input type=button class=hideshow></input>
+
 ```{r}
 #| warning:  false
 
 
 sessionInfo()
 ```
+
+```{=html}
 <script>
 $( "input.hideshow" ).each( function ( index, button ) {
   button.value = 'Hide Output';
@@ -584,3 +599,4 @@ $( "input.hideshow" ).each( function ( index, button ) {
   } );
 } );
 </script>
+```
