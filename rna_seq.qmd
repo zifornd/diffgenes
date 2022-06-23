@@ -11,8 +11,6 @@ number-sections: true
 fig-cap-location: bottom
 execute:
   echo: false
-pre-render: data_validation.R
-post-render: output_validation.R
 params:
   sample_data:
     - "./data/samples.tsv"
@@ -493,73 +491,73 @@ output_files <- list(
     list(
         File = "counts",
         Link = "<a href='./results/counts.tsv'> counts </a>",
-        Description = "counts file"
+        Description = "counts matrix for each gene in each sample"
         ),
     list(
-        File = "normalized counts",
+        File = "Normalized Counts",
         Link = "<a href='./results/normcounts.tsv'> norm_counts </a>",
-        Description = "normalized counts file"
+        Description = "normalized by rlog counts file"
         ),
     list(
-      File = "log counts",
+      File = "Log counts",
         Link = "<a href='./results/logcounts.tsv'> log_counts </a>",
-        Description = "log counts file"
+        Description = "Log-Normalized counts matrix "
     ),
     list(
       File = "DESeqDataSet.rds",
         Link = "<a href='./results/DESeqDataSet.rds'> dds </a>",
-        Description = "dds"
+        Description = "DESeqDataSet object "
     ),
     list(
       File = "DESeqTransform.rds",
         Link = "<a href='./results/DESeqTransform.rds'> tranform_dds </a>",
-        Description = "tranformed dds"
+        Description = "DESeqTransform object "
     ),
     list(
       File = "DESeqResults_Treated_vs_Untreated_.rds",
-        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.rds'> tranform_dds </a>",
-        Description = "rds of treated vs untreated"
+        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.rds'> results_dds </a>",
+        Description = "DESeqResults object for contrast  treated vs untreated"
     ),
     list(
       File = "DESeqResults_Treated_vs_Untreated_.tsv",
-        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.tsv'> tranform_dds </a>",
-        Description = "tsv of treated vs untreated"
+        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.tsv'> results_tsv </a>",
+        Description = "Results table for treated vs untreated"
     ),
     list(
-      File = "pca plot",
-        Link = "<a href='./rna_seq_files/figure-html/fig-pcaplot-1.png> tranform_dds </a>",
-        Description = "pca"
+      File = "PCA",
+        Link = "<a href='./rna_seq_files/figure-html/fig-pcaplot-1.png> pca </a>",
+        Description = "PCA plot using rlog-transformed values"
     ),
     list(
-      File = "heatmap_dist",
-        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap_distance-1.png'> HEATMAP_DIST </a>",
-        Description = "heatmap_distance"
+      File = "Heatmap_dist",
+        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap_distance-1.png'> heatmap_dist </a>",
+        Description = "Heatmap of sample-to-sample distances "
     ),
     list(
-      File = "mds_plot",
-        Link = "<a href='./rna_seq_files/figure-html/fig-mdsplot-1.png'> HEATMAP_DIST </a>",
-        Description = "mds plot"
+      File = "MDS",
+        Link = "<a href='./rna_seq_files/figure-html/fig-mdsplot-1.png'> mds</a>",
+        Description = "MDS plot using rlog-transformed values"
     ),
     list(
-      File = "boxplot",
-        Link = "<a href='./rna_seq_files/figure-html/fig-boxplot-1.png'> HEATMAP_DIST </a>",
-        Description = "boxplot"
+      File = "Boxplot",
+        Link = "<a href='./rna_seq_files/figure-html/fig-boxplot-1.png'> boxplot </a>",
+        Description = "Boxplot of gene expression values"
     ),
     
     list(
       File = "MA",
-        Link = "<a href='./rna_seq_files/figure-html/fig-plotMA-1.png'> MA </a>",
-        Description = "MA"
+        Link = "<a href='./rna_seq_files/figure-html/fig-plotMA-1.png'> ma </a>",
+        Description = "MA-plot of changes induced by treatment"
     ),
     list(
-      File = "VOLCANO",
-        Link = "<a href='./rna_seq_files/figure-html/fig-volcano-1.png'> VOLCANO </a>",
-        Description = "VOLCANO"
+      File = "Volcano",
+        Link = "<a href='./rna_seq_files/figure-html/fig-volcano-1.png'> volcano </a>",
+        Description = "Volcano Plot of Differentially Expressed genes"
     ),
     list(
-      File = "heatmap",
-        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap-1.png'> HEATMAP </a>",
-        Description = "heatmap"
+      File = "Heatmap",
+        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap-1.png'> heatmap_geneexp </a>",
+        Description = "Heatmap  of Gene Expression"
     )
     
     
@@ -567,7 +565,7 @@ output_files <- list(
 )
 
 output_files <- jsonlite::toJSON(output_files, pretty = TRUE)
-DT::datatable(jsonlite::fromJSON(output_files),escape = FALSE)
+DT::datatable(jsonlite::fromJSON(output_files))
 
 ```
 

@@ -1,0 +1,7 @@
+project:
+  title: "rna_seq"
+  pre-render: input_validation.R
+  post-render: output_validation.R
+
+
+
