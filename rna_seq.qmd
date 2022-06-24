@@ -266,7 +266,7 @@ This section contains the results table which has the differentially expressed g
 
 #### Contrast factor - Condition
 
-::: panel-tabset
+::: {.panel-tabset}
 ```{r}
 #| results: "asis"
 #| warning:  false
