@@ -1,0 +1,650 @@
+---
+title: "Bulk Gene Expression Analysis"
+format: html
+editor: visual
+author: Zifo RnD Solutions
+date: "`r Sys.Date()`"
+toc : true
+toc-title : Contents
+toc-location : left
+number-sections: true
+fig-cap-location: bottom
+execute:
+  echo: false
+params:
+  sample_data:
+    - "./data/samples.tsv"
+  counts_data:
+    - "./data/counts.tsv"
+  genes_data:
+    - "./data/genes.tsv"
+  design:
+    - "~type + condition"
+  organism: 
+    - org.Dm.eg.db
+  colname:
+    - "condition"
+  contrasts:
+    value:
+      Treated_vs_Untreated: ["treated", "untreated"]
+      
+  pCutoff_volcano:
+    - 10e-32
+  FCcutoff_volcano:
+    -  2
+---
+
+```{r}
+#| warning: false
+#| include: false
+#| label: Installation and loading
+# Installing the required packages and loading them  for Bulk RNA Seq Analysis.
+library(dplyr)
+library(viridis)
+library(DESeq2)
+library(pheatmap)
+library(AnnotationDbi)
+if (!require(params$organism, quietly = TRUE)) {
+  BiocManager::install(params$organism, update = FALSE, ask = FALSE)
+}
+library(params$organism, character.only = TRUE)
+library(EnhancedVolcano)
+library(ggplot2)
+library(tidyverse)
+library(DT)
+library(knitr)
+DT::datatable(matrix())
+options(DT.warn.size=FALSE)
+
+```
+
+
+## Metadata of samples
+
+
+```{r}
+#| warning:  false
+#| label: metadata
+
+#metadata
+samples <- read.delim(params$sample_data)
+
+```
+
+
+This section contains the sample metadata which includes the sample name , condition and type or batch effect if present.
+
+
+```{r}
+#| warning:  false
+#| label: metadata datatable
+
+#viewing metadata in datatable
+DT::datatable(samples)
+```
+
+
+## Starting from Count matrix and Constructing the DESeqDataSet object
+
+*DESeqDataSet* is made using countdata and coldata.
+
+    -   countdata: a table with the fragment counts
+
+    -   coldata: a table with information about the samples
+
+
+```{r}
+#| warning: false
+#| label: dds creation
+
+#reading the gene annotation file
+genes <- read.delim(params$genes_data)
+
+#reading the counts matrix
+Counts<- read.delim(params$counts_data)
+
+#writing the counts tsv file to results folder
+write.table(Counts, file = "./results/counts.tsv")
+
+#converting counts to a matrix 
+countDataMatrix <- as.matrix(Counts[ , -1])
+rownames(countDataMatrix) <- Counts[ , 1]
+
+
+
+#making a dds object using counts matrix and samples metadata
+dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, 
+                              design = as.formula(params$design) )
+```
+
+
+## Exploratory Analysis and Visualization
+
+It is important to normalize the data before visualizing it and DESeq2 offers transformations for count data that stabilize the variance across the mean. It minimizes differences between samples for rows with small counts, and normalizes with respect to library size. In this case, regularized-logarithm transformation or rlog was done for the data for visualizations.
+
+
+```{r}
+#| warning: false
+#| label: normalization using rlog 
+#rlog transformation for data visualization
+rld <- rlog(dds, blind=TRUE)
+#Saving the DESeqTransform object as rds in results directory
+saveRDS(rld,"./results/DESeqTransform.rds")
+
+```
+
+
+### PCA Plot
+
+Principal Components Analysis (PCA) visualizes sample-to-sample distances . In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that capture the most of the variance across samples. The x-axis is the direction that separates the data points the most. The coordinates of the samples in this direction are called PC1.
+
+
+```{r}
+#| warning: false
+#| label: fig-pcaplot
+#| fig-cap: PCA Plot of Sample Distances
+
+#pca plot with color and shape distnguishment
+#condition-color
+#batch effect-shape
+pcaData <- plotPCA(rld, intgroup=c("condition", "type"), returnData=TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(PC1, PC2, color=condition, shape=type)) + ggtitle("PCA Plot") +
+  geom_point(size=3) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed()
+
+```
+
+
+@fig-pcaplot shows the distance between the gene expression of samples which can be useful to investigate the reasons for clustering of samples,find out if there are any batch effects and add them in deseq2 while modelling. It can also help to remove the outlier samples if any for the downstream analysis . The points are coloured by condition and the shape indicates the batch .
+
+### Heatmap
+
+Sample - sample distances can be viewed in Heatmap also. A heatmap of this distance matrix gives us an overview over similarities and dissimilarities between samples.
+
+
+```{r}
+#| warning: false
+#| label: fig-heatmap_distance
+#| fig-cap: Heatmap Plot of Sample Distances
+
+
+#matrix using transformed matrix
+rld_mat <- assay(rld) 
+write.table(rld_mat, file="./results/logcounts.tsv", sep="\t", quote=F,   col.names=NA)
+rld_cor <- cor(rld_mat) 
+samples_initial<- read.delim(params$sample_data)
+annot_col <- samples_initial%>%
+  column_to_rownames('sample') %>%
+  dplyr::select(condition,type) %>%
+  as.data.frame()
+
+#heatmap using rlog transformed matrix
+heatmap<-pheatmap(mat=rld_cor,main = "Heatmap - Sample Distances",color = viridis(n=256),
+annotation_col = annot_col)
+heatmap
+
+```
+
+
+@fig-heatmap_distance shows the relation between the samples,clustering of samples and reasons behind it. PCA plots can be verified based on the results from the heatmap. Use the annotations on top for better interpretation of the data.
+
+### MDS Plot
+
+Another plot which is similar to the PCA plot, can be made using the multidimensional scaling (MDS) function in base R. This is useful when we don't have a matrix of data, but only a matrix of distances. Here we compute the MDS for the distances calculated from the rld data and plot these in a figure below.
+
+
+```{r}
+#| warning: false
+#| label: fig-mdsplot
+#| fig-cap: MDS Plot 
+
+#mds plot
+sampleDists <- dist( t( assay(rld) ) )
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste(samples$condition, samples$type, sep="-" )
+colnames(sampleDistMatrix) <- NULL
+mds <- data.frame(cmdscale(sampleDistMatrix))
+mds <- cbind(mds, as.data.frame(colData(rld)))
+ggplot(mds, aes(X1,X2,color=condition,shape=type)) + geom_point(size=3) +ggtitle("MDS Plot")
+```
+
+
+@fig-mdsplot infers the variation between samples.
+
+### Boxplot
+
+Boxplots are a standardized way of displaying the distribution of data based on a five number summary ("minimum", first quartile (Q1), median, third quartile (Q3), and "maximum"). Here boxplot is plotted for the gene expression values.
+
+
+```{r}
+#| warning: false
+#| label: fig-boxplot
+#| fig-cap: boxplot
+
+#boxplot
+counts <- rld_mat
+samples <- colData(dds)
+
+data <- stack(counts)
+
+colnames(data) <- c("gene", "sample", "count")
+data <- merge(data, samples, by = "sample")
+data <- as.data.frame(data)
+
+
+ggplot(data, aes(sample, count, fill = condition)) +
+  geom_boxplot() + ggtitle("Boxplot") +
+  facet_wrap(~ type, scales = "free_x")
+
+
+
+
+```
+
+
+@fig-boxplot shows better insights into the distribution per sample. This is helpful to determine whether the baseline distribution is similar across all samples. Large variations suggest normalization has not worked. The boxes is coloured by condition and facetted by batch .
+
+## Differential Expression Analysis
+
+The differential expression analysis using DESeq on DESeqDataSet object for Treated Vs Untreated condition. The brief steps of DESeq includes:
+
+1.  The estimation of size factors
+
+2.  The estimation of dispersion values
+
+3.  Fitting a final generalized linear model estimated above, which gives estimates of the log fold changes.
+
+
+```{r}
+#| warning: false
+#| label: deseq and normalization
+
+#dir.create("./results")
+#dir.create("./results/deseq2")
+#Saving the dds object as rds in results directory
+saveRDS(dds,"./results/DESeqDataSet.rds")
+
+
+#deseq2 analysis using DESeq function
+dds <- DESeq(dds)
+
+#constructing normalized counts
+normalized_counts <- counts(dds, normalized=TRUE)
+#writing normalized counts to tsv file
+write.table(normalized_counts, file="./results/normcounts.tsv", sep="\t", quote=F,   col.names=NA)
+
+```
+
+
+### Results table
+
+This section contains the results table which has the differentially expressed genes over the particular contrast after Differential Expression Analysis. Results table initially contains information about Ensembl gene IDs, but alternative gene symbols may be more informative for analysis. Bioconductor's annotation packages help with mapping various ID schemes to each other.
+
+#### Contrast factor - Condition
+
+::: panel-tabset
+
+```{r}
+#| results: "asis"
+#| warning:  false
+#| label: results table
+
+contrasts_1 <- names(params$contrasts)
+#results table for each of the contrasts
+for (contrast in contrasts_1){
+
+  groups <- params$contrasts[[contrast]]
+
+  res <- results(dds, contrast = c(params$colname, groups[1], groups[2]))
+  #annotating the results table with gene symbols
+  #mapping ensembl id to enrez id and gene symbol using mapIds
+  ids <- strsplit(rownames(res), ".", fixed = TRUE)
+  ids <- sapply(ids, head, n = 1)
+  org<-eval(parse(text=params$organism))
+  #for symbol
+  res$symbol <- mapIds(
+    x = org,
+    keys = ids,
+    column = "SYMBOL",
+    keytype = "ENSEMBL",
+    multiVals = "first"
+  )
+  res_table<-as.data.frame(res)
+  
+  #writing results to tsv file
+  write.table(res_table, file=paste("./results/DESeqResults",contrast,".tsv",sep="_"), sep="\t", quote=F,             col.names=NA)
+  #saving results as rds 
+  saveRDS(res, file=paste("./results/DESeqResults",contrast,".rds",sep="_"))
+  
+  cat("###",contrast,"\n")
+  table<-DT::datatable(res_table, height = "20%", width = "100%", options = list(scrollX = TRUE)) %>%
+    formatRound(columns = c("baseMean","log2FoldChange","lfcSE","stat"),digits = 3) %>%
+     formatRound(columns = c("pvalue", "padj"),digits = 1)
+  cat(knitr::knit_print(table))
+    
+  cat("\n\n")
+}
+
+```
+
+:::
+
+::: callout-note
+## For displaying of results tables, the numbers are rounded for easy interpretation.
+:::
+
+Metadata with information on the meaning of the columns is given below:
+
+
+```{r}
+#| warning:  false
+#| label: results metadata
+
+#metadata of results table
+res_metadata<-mcols(res, use.names = TRUE)
+res_metadata<-as.data.frame(res_metadata)
+#viewing metadata  as data table
+DT::datatable(res_metadata)
+```
+
+
+Lets have a look at what each column means :
+
+1.  Base Mean : average of the normalized count values, dividing by size factors, taken over all samples in the DESeqDataSet
+
+2.  log2FoldChange : It is the effect size estimate. It tells us how much the gene's expression seems to have changed due to the factor. This value is reported on a logarithmic scale to base 2.
+
+3.  lfcSE : the standard error estimate for the log2 fold change estimate.
+
+4.  stat : For the Wald test, stat is the Wald statistic
+
+5.  pvalue : result of hypothesis test for each gene is reported as a p value.For example, the set of genes with adjusted p value less than 0.1 should contain no more than 10% false positives.
+
+6.  adjusted p value : satisfy the property that thresholding at a specific value defines a set of tests (one for each gene) with a bounded false discovery rate (FDR), typically a useful metric for assessing which genes to target for further analysis
+
+### Plotting of DESEQ2 results
+
+#### plotMA
+
+An MA-plot provides a useful overview for an experiment with a two-group comparison.
+
+
+```{r}
+#| warning: false
+#| label: fig-plotMA
+#| fig-cap: An MA-plot of changes induced by treatment.
+
+#ma plot
+plotMA(res, main = "MA Plot")
+abline(h=c(-1,1), col="dodgerblue", lwd=2)
+legend(1e+04, 3, legend=c("Non Sign", "Sign"), 
+       fill = c("grey","blue")) 
+```
+
+
+In @fig-plotMA ,The log2 fold change for a particular comparison is plotted on the y-axis and the average of the counts normalized by size factor is shown on the x-axis Each gene is represented with a dot. Genes with an adjusted p value below a threshold (here 0.1, the default) are shown in blue.
+
+#### Volcanoplot
+
+A volcano plot is a type of scatterplot that shows statistical significance (P value) versus magnitude of change (fold change). It enables quick visual identification of genes with large fold changes that are also statistically significant. In a volcano plot, the most up-regulated genes are towards the right, the most down-regulated genes are towards the left, and the most statistically significant genes are towards the top.
+
+
+```{r}
+#| warning: false
+#| label: fig-volcano
+#| fig-cap: Volcano Plot of Differentially Expressed genes
+
+#volcano plot
+EnhancedVolcano(res,
+                lab = res$symbol,
+                x = 'log2FoldChange',
+                y = 'pvalue',
+                pCutoff = as.numeric(params$pCutoff_volcano),
+                FCcutoff = as.numeric(params$FCcutoff_volcano),
+                pointSize = 3.0,
+                labSize = 6.0 ,
+                )
+```
+
+
+In @fig-volcano, differentially expressed genes which are statistically significant are labelled in red color. The pCutoff and FCcutoff can also be updated based on needs.
+
+#### Heatmap
+
+Since the clustering is only relevant for genes that actually carry a signal, one usually would only cluster a subset of the most highly variable genes. This section shows the heatmap of gene expression of 20 top genes across all samples .
+
+
+```{r}
+#| warning: false
+#| label: fig-heatmap
+#| fig-cap: Heatmap of relative rlog-transformed values across samples
+
+#heatmap 
+
+#using blind= false for heatmap for rlog transformation
+rld_downstream <- rlog(dds, blind=FALSE)
+
+#ordering the genes based on l2fc,retrieving the first 20 gene rownames
+genes <- order(res$log2FoldChange, decreasing=TRUE)[1:20]
+gene_names<-rownames(res)[genes]
+
+#getting the gene symbols of those 20 rownames
+names<-res$symbol[gene_names]
+#making it into a dataframe
+names<-data.frame(names)
+
+# to see the actual data,the fragment counts,using the assay function.
+data<-colnames(assay(rld_downstream)[gene_names,])
+#cbinding the gene symbols along with assay(rld)
+new<-cbind(names,assay(rld_downstream)[gene_names,])
+df <- subset (new, select = -names)
+
+#for annotations on condition and sequencing type
+annot_col <- samples_initial%>%
+  column_to_rownames('sample') %>%
+  dplyr::select(condition,type) %>%
+  as.data.frame()
+
+#using pheatmap for heatmap
+pheatmap(df, cluster_rows=TRUE, labels_row = names$names,legend_breaks = -2:2,
+         cluster_cols=FALSE, annotation_col=annot_col, main= "Heatmap of expression of genes",scale = "row")
+         
+
+```
+
+
+In @fig-heatmap, annotation information are shown with colored bars at the top. It helps us to find out the over expression or under expression of top selected genes in specific samples. The clustering of gene expression can be studied using the annotations provided.
+
+## Summary
+
+### Parameters
+
+
+```{r}
+#| warning:  false
+#| label: parameters table
+
+#parameters table as a list, later viewed in DT
+parameters <- list(
+    list(
+        Parameter = names(params[1]),
+        Value = params[[1]],
+        Description = "Sample metadata"
+    ),
+    list(
+        Parameter = names(params[2]),
+        Value = params[[2]],
+        Description = "Counts data for Differential Expression Analysis"
+    ),
+    list(
+        Parameter = names(params[3]),
+        Value = params[[3]],
+        Description = "Gene Annotation file "
+    ),
+    list(
+        Parameter = names(params[4]),
+        Value = params[[4]],
+        Description = "The design for the Differential Expression Analysis"
+    ),
+    list(
+        Parameter = names(params[5]),
+        Value = params[[5]],
+        Description = "Organism in the study"
+    ),
+    list(
+        Parameter = names(params[6]),
+        Value = params[[6]],
+        Description = "Colname in the metadata used as factor for Differential Expression Analysis"
+    ),
+    
+    list(
+        Parameter = names(params[7]),
+        Value = names(params$contrasts),
+        Description = "Contrasts for DESeq2 analysis"
+    ),
+    list(
+        Parameter = names(params[8]),
+        Value = params[[8]],
+        Description = "pCutoff for the volcano plot"
+    ),
+      list(
+        Parameter = names(params[9]),
+        Value = params[[9]],
+        Description = "FCutoff for the volcano plot"
+    )
+   
+   
+)
+
+parameters <- jsonlite::toJSON(parameters, pretty = TRUE)
+DT::datatable(jsonlite::fromJSON(parameters))
+
+```
+
+
+### Output Files
+
+
+```{r}
+#| warning:  false
+#| label: output files table
+
+#output files as a list and later viewed in DT
+output_files <- list(
+    list(
+        File = "counts",
+        Link = "<a href='./results/counts.tsv'> counts </a>",
+        Description = "counts matrix for each gene in each sample"
+        ),
+    list(
+        File = "Normalized Counts",
+        Link = "<a href='./results/normcounts.tsv'> norm_counts </a>",
+        Description = "normalized by rlog counts file"
+        ),
+    list(
+      File = "Log counts",
+        Link = "<a href='./results/logcounts.tsv'> log_counts </a>",
+        Description = "Log-Normalized counts matrix "
+    ),
+    list(
+      File = "DESeqDataSet.rds",
+        Link = "<a href='./results/DESeqDataSet.rds'> dds </a>",
+        Description = "DESeqDataSet object "
+    ),
+    list(
+      File = "DESeqTransform.rds",
+        Link = "<a href='./results/DESeqTransform.rds'> tranform_dds </a>",
+        Description = "DESeqTransform object "
+    ),
+    list(
+      File = "DESeqResults_Treated_vs_Untreated_.rds",
+        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.rds'> results_dds </a>",
+        Description = "DESeqResults object for contrast  treated vs untreated"
+    ),
+    list(
+      File = "DESeqResults_Treated_vs_Untreated_.tsv",
+        Link = "<a href='./results/DESeqResults_Treated_vs_Untreated_.tsv'> results_tsv </a>",
+        Description = "Results table for treated vs untreated"
+    ),
+    list(
+      File = "PCA",
+        Link = "<a href='./rna_seq_files/figure-html/fig-pcaplot-1.png'> pca </a>",
+        Description = "PCA plot using rlog-transformed values"
+    ),
+    list(
+      File = "Heatmap_dist",
+        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap_distance-1.png'> heatmap_dist </a>",
+        Description = "Heatmap of sample-to-sample distances "
+    ),
+    list(
+      File = "MDS",
+        Link = "<a href='./rna_seq_files/figure-html/fig-mdsplot-1.png'> mds</a>",
+        Description = "MDS plot using rlog-transformed values"
+    ),
+    list(
+      File = "Boxplot",
+        Link = "<a href='./rna_seq_files/figure-html/fig-boxplot-1.png'> boxplot </a>",
+        Description = "Boxplot of gene expression values"
+    ),
+    
+    list(
+      File = "MA",
+        Link = "<a href='./rna_seq_files/figure-html/fig-plotMA-1.png'> ma </a>",
+        Description = "MA-plot of changes induced by treatment"
+    ),
+    list(
+      File = "Volcano",
+        Link = "<a href='./rna_seq_files/figure-html/fig-volcano-1.png'> volcano </a>",
+        Description = "Volcano Plot of Differentially Expressed genes"
+    ),
+    list(
+      File = "Heatmap",
+        Link = "<a href='./rna_seq_files/figure-html/fig-heatmap-1.png'> heatmap_geneexp </a>",
+        Description = "Heatmap  of Gene Expression"
+    )
+    
+    
+    
+)
+
+output_files <- jsonlite::toJSON(output_files, pretty = TRUE)
+DT::datatable(jsonlite::fromJSON(output_files))
+
+```
+
+
+### Session Information
+
+<input type=button class=hideshow></input>
+
+
+```{r}
+#| warning:  false
+#| label: session info
+
+#for the session info
+sessionInfo()
+```
+
+```{=html}
+<script>
+$( "input.hideshow" ).each( function ( index, button ) {
+  button.value = 'Hide Output';
+  $( button ).click( function () {
+    var target = this.nextSibling ? this : this.parentNode;
+    target = target.nextSibling.nextSibling;
+    if ( target.style.display == 'block' || target.style.display == '' ) {
+      target.style.display = 'none';
+      this.value = 'Show Output';
+    } else {
+      target.style.display = 'block';
+      this.value = 'Hide Output';
+    }
+  } );
+} );
+</script>
+```
+

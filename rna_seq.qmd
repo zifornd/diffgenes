@@ -37,6 +37,7 @@ params:
 ```{r}
 #| warning: false
 #| include: false
+#| label: Installation and loading
 # Installing the required packages and loading them  for Bulk RNA Seq Analysis.
 library(dplyr)
 library(viridis)
@@ -61,22 +62,22 @@ options(DT.warn.size=FALSE)
 
 ```{r}
 #| warning:  false
+#| label: metadata
+
+#metadata
 samples <- read.delim(params$sample_data)
 
 ```
 
-This section contains the sample metadata. Sample name , condition and type or batch effect if present should be present in the table.
+This section contains the sample metadata which includes the sample name , condition and type or batch effect if present.
 
 ```{r}
 #| warning:  false
+#| label: metadata datatable
 
-#metadata
+#viewing metadata in datatable
 DT::datatable(samples)
 ```
-
-::: callout-note
-## The fileds of the metadata has been edited in the way required for analysis
-:::
 
 ## Starting from Count matrix and Constructing the DESeqDataSet object
 
@@ -88,6 +89,7 @@ DT::datatable(samples)
 
 ```{r}
 #| warning: false
+#| label: dds creation
 
 #reading the gene annotation file
 genes <- read.delim(params$genes_data)
@@ -98,22 +100,24 @@ Counts<- read.delim(params$counts_data)
 #writing the counts tsv file to results folder
 write.table(Counts, file = "./results/counts.tsv")
 
+#converting counts to a matrix 
 countDataMatrix <- as.matrix(Counts[ , -1])
 rownames(countDataMatrix) <- Counts[ , 1]
+
 
 
 #making a dds object using counts matrix and samples metadata
 dds <- DESeqDataSetFromMatrix(countData = countDataMatrix, colData = samples, 
                               design = as.formula(params$design) )
-dds
 ```
 
 ## Exploratory Analysis and Visualization
 
-It is important to normalize the data before visualizing it and DESeq2 offers transformations for count data that stabilize the variance across the mean. It minimizes differences between samples for rows with small counts, and normalizes with respect to library size.In this case , regularized-logarithm transformation or rlog2 was done for the data.
+It is important to normalize the data before visualizing it and DESeq2 offers transformations for count data that stabilize the variance across the mean. It minimizes differences between samples for rows with small counts, and normalizes with respect to library size. In this case, regularized-logarithm transformation or rlog was done for the data for visualizations.
 
 ```{r}
 #| warning: false
+#| label: normalization using rlog 
 #rlog transformation for data visualization
 rld <- rlog(dds, blind=TRUE)
 #Saving the DESeqTransform object as rds in results directory
@@ -130,9 +134,12 @@ Principal Components Analysis (PCA) visualizes sample-to-sample distances . In t
 #| label: fig-pcaplot
 #| fig-cap: PCA Plot of Sample Distances
 
+#pca plot with color and shape distnguishment
+#condition-color
+#batch effect-shape
 pcaData <- plotPCA(rld, intgroup=c("condition", "type"), returnData=TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
-ggplot(pcaData, aes(PC1, PC2, color=condition, shape=type)) +
+ggplot(pcaData, aes(PC1, PC2, color=condition, shape=type)) + ggtitle("PCA Plot") +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
@@ -140,9 +147,9 @@ ggplot(pcaData, aes(PC1, PC2, color=condition, shape=type)) +
 
 ```
 
-@fig-pcaplot shows the distance between the gene expression of samples which can be useful to investigate the reasons for clustering of samples,find out if there are any batch effects and add them in deseq2 while modelling. It can also help to remove the outlier samples if any for the downstream analysis .
+@fig-pcaplot shows the distance between the gene expression of samples which can be useful to investigate the reasons for clustering of samples,find out if there are any batch effects and add them in deseq2 while modelling. It can also help to remove the outlier samples if any for the downstream analysis . The points are coloured by condition and the shape indicates the batch .
 
-### 2.Heatmap
+### Heatmap
 
 Sample - sample distances can be viewed in Heatmap also. A heatmap of this distance matrix gives us an overview over similarities and dissimilarities between samples.
 
@@ -151,6 +158,8 @@ Sample - sample distances can be viewed in Heatmap also. A heatmap of this dista
 #| label: fig-heatmap_distance
 #| fig-cap: Heatmap Plot of Sample Distances
 
+
+#matrix using transformed matrix
 rld_mat <- assay(rld) 
 write.table(rld_mat, file="./results/logcounts.tsv", sep="\t", quote=F,   col.names=NA)
 rld_cor <- cor(rld_mat) 
@@ -160,6 +169,7 @@ annot_col <- samples_initial%>%
   dplyr::select(condition,type) %>%
   as.data.frame()
 
+#heatmap using rlog transformed matrix
 heatmap<-pheatmap(mat=rld_cor,main = "Heatmap - Sample Distances",color = viridis(n=256),
 annotation_col = annot_col)
 heatmap
@@ -168,33 +178,37 @@ heatmap
 
 @fig-heatmap_distance shows the relation between the samples,clustering of samples and reasons behind it. PCA plots can be verified based on the results from the heatmap. Use the annotations on top for better interpretation of the data.
 
-### 3.MDS Plot
+### MDS Plot
+
+Another plot which is similar to the PCA plot, can be made using the multidimensional scaling (MDS) function in base R. This is useful when we don't have a matrix of data, but only a matrix of distances. Here we compute the MDS for the distances calculated from the rld data and plot these in a figure below.
 
 ```{r}
+#| warning: false
 #| label: fig-mdsplot
 #| fig-cap: MDS Plot 
 
+#mds plot
 sampleDists <- dist( t( assay(rld) ) )
-sampleDists
 sampleDistMatrix <- as.matrix( sampleDists )
-sampleDistMatrix
 rownames(sampleDistMatrix) <- paste(samples$condition, samples$type, sep="-" )
 colnames(sampleDistMatrix) <- NULL
-sampleDistMatrix
 mds <- data.frame(cmdscale(sampleDistMatrix))
-mds
 mds <- cbind(mds, as.data.frame(colData(rld)))
-mds
-ggplot(mds, aes(X1,X2,color=condition,shape=type)) + geom_point(size=3)
+ggplot(mds, aes(X1,X2,color=condition,shape=type)) + geom_point(size=3) +ggtitle("MDS Plot")
 ```
-@fig-mdsplot
 
-### 4.Boxplot of gene expression values
+@fig-mdsplot infers the variation between samples.
+
+### Boxplot
+
+Boxplots are a standardized way of displaying the distribution of data based on a five number summary ("minimum", first quartile (Q1), median, third quartile (Q3), and "maximum"). Here boxplot is plotted for the gene expression values.
 
 ```{r}
+#| warning: false
 #| label: fig-boxplot
 #| fig-cap: boxplot
 
+#boxplot
 counts <- rld_mat
 samples <- colData(dds)
 
@@ -206,14 +220,15 @@ data <- as.data.frame(data)
 
 
 ggplot(data, aes(sample, count, fill = condition)) +
-  geom_boxplot() +
+  geom_boxplot() + ggtitle("Boxplot") +
   facet_wrap(~ type, scales = "free_x")
 
 
 
 
 ```
-@fig-boxplot
+
+@fig-boxplot shows better insights into the distribution per sample. This is helpful to determine whether the baseline distribution is similar across all samples. Large variations suggest normalization has not worked. The boxes is coloured by condition and facetted by batch .
 
 ## Differential Expression Analysis
 
@@ -227,6 +242,7 @@ The differential expression analysis using DESeq on DESeqDataSet object for Trea
 
 ```{r}
 #| warning: false
+#| label: deseq and normalization
 
 #dir.create("./results")
 #dir.create("./results/deseq2")
@@ -236,7 +252,6 @@ saveRDS(dds,"./results/DESeqDataSet.rds")
 
 #deseq2 analysis using DESeq function
 dds <- DESeq(dds)
-dds
 
 #constructing normalized counts
 normalized_counts <- counts(dds, normalized=TRUE)
@@ -247,7 +262,7 @@ write.table(normalized_counts, file="./results/normcounts.tsv", sep="\t", quote=
 
 ### Results table
 
-This section contains the results table which has the differentially expressed genes over the particular contrast after Differential Expression Analysis.
+This section contains the results table which has the differentially expressed genes over the particular contrast after Differential Expression Analysis. Results table initially contains information about Ensembl gene IDs, but alternative gene symbols may be more informative for analysis. Bioconductor's annotation packages help with mapping various ID schemes to each other.
 
 #### Contrast factor - Condition
 
@@ -255,14 +270,16 @@ This section contains the results table which has the differentially expressed g
 ```{r}
 #| results: "asis"
 #| warning:  false
+#| label: results table
 
 contrasts_1 <- names(params$contrasts)
-
+#results table for each of the contrasts
 for (contrast in contrasts_1){
 
   groups <- params$contrasts[[contrast]]
 
   res <- results(dds, contrast = c(params$colname, groups[1], groups[2]))
+  #annotating the results table with gene symbols
   #mapping ensembl id to enrez id and gene symbol using mapIds
   ids <- strsplit(rownames(res), ".", fixed = TRUE)
   ids <- sapply(ids, head, n = 1)
@@ -277,9 +294,9 @@ for (contrast in contrasts_1){
   )
   res_table<-as.data.frame(res)
   
-  #writing normalized counts to tsv file
+  #writing results to tsv file
   write.table(res_table, file=paste("./results/DESeqResults",contrast,".tsv",sep="_"), sep="\t", quote=F,             col.names=NA)
-  
+  #saving results as rds 
   saveRDS(res, file=paste("./results/DESeqResults",contrast,".rds",sep="_"))
   
   cat("###",contrast,"\n")
@@ -294,12 +311,20 @@ for (contrast in contrasts_1){
 ```
 :::
 
+::: callout-note
+## For displaying of results tables, the numbers are rounded for easy interpretation.
+:::
+
 Metadata with information on the meaning of the columns is given below:
 
 ```{r}
 #| warning:  false
+#| label: results metadata
+
+#metadata of results table
 res_metadata<-mcols(res, use.names = TRUE)
 res_metadata<-as.data.frame(res_metadata)
+#viewing metadata  as data table
 DT::datatable(res_metadata)
 ```
 
@@ -317,19 +342,7 @@ Lets have a look at what each column means :
 
 6.  adjusted p value : satisfy the property that thresholding at a specific value defines a set of tests (one for each gene) with a bounded false discovery rate (FDR), typically a useful metric for assessing which genes to target for further analysis
 
-### Annotating to other names-entrez/gene symbol
-
-Our result table so far only contains information about Ensembl gene IDs, but alternative gene names may be more informative for analysis. Bioconductor's annotation packages help with mapping various ID schemes to each other.
-
-Using the mapIds function to add individual columns to our results table. Providing the row names of our results table as a key, and specify that keytype=ENSEMBL. The column argument tells the mapIds function which information we want, and the multiVals argument tells the function what to do if there are multiple possible values for a single input value. Here just giving us back the first one that occurs in the database.To add the gene symbol and Entrez ID, we called mapIds twice.
-
-Lets have a look at the new results table with additional columns we would love to see:
-
-The results table can be further reduced to a much better version by giving strict padj and log2FoldChange thresholds
-
 ### Plotting of DESEQ2 results
-
-@fig-plotCounts, visualizing the normalized counts over both conditions. It helps us to infer the level of difference in gene expression in different conditions. Hence , we can say if there is no or up or down regulation of a gene in a particular condition.
 
 #### plotMA
 
@@ -340,8 +353,8 @@ An MA-plot provides a useful overview for an experiment with a two-group compari
 #| label: fig-plotMA
 #| fig-cap: An MA-plot of changes induced by treatment.
 
-
-plotMA(res)
+#ma plot
+plotMA(res, main = "MA Plot")
 abline(h=c(-1,1), col="dodgerblue", lwd=2)
 legend(1e+04, 3, legend=c("Non Sign", "Sign"), 
        fill = c("grey","blue")) 
@@ -358,7 +371,7 @@ A volcano plot is a type of scatterplot that shows statistical significance (P v
 #| label: fig-volcano
 #| fig-cap: Volcano Plot of Differentially Expressed genes
 
-
+#volcano plot
 EnhancedVolcano(res,
                 lab = res$symbol,
                 x = 'log2FoldChange',
@@ -381,7 +394,9 @@ Since the clustering is only relevant for genes that actually carry a signal, on
 #| label: fig-heatmap
 #| fig-cap: Heatmap of relative rlog-transformed values across samples
 
+#heatmap 
 
+#using blind= false for heatmap for rlog transformation
 rld_downstream <- rlog(dds, blind=FALSE)
 
 #ordering the genes based on l2fc,retrieving the first 20 gene rownames
@@ -420,7 +435,9 @@ In @fig-heatmap, annotation information are shown with colored bars at the top. 
 
 ```{r}
 #| warning:  false
+#| label: parameters table
 
+#parameters table as a list, later viewed in DT
 parameters <- list(
     list(
         Parameter = names(params[1]),
@@ -440,38 +457,33 @@ parameters <- list(
     list(
         Parameter = names(params[4]),
         Value = params[[4]],
-        Description = "The design for the Differential Expression Analysis_1"
+        Description = "The design for the Differential Expression Analysis"
     ),
     list(
         Parameter = names(params[5]),
         Value = params[[5]],
-        Description = "The design for the Differential Expression Analysis_2"
+        Description = "Organism in the study"
     ),
     list(
         Parameter = names(params[6]),
         Value = params[[6]],
-        Description = "Organism in the study"
+        Description = "Colname in the metadata used as factor for Differential Expression Analysis"
     ),
     
     list(
         Parameter = names(params[7]),
-        Value = params[[7]],
-        Description = "Colname in the metadata used as factor for Differential Expression_1"
+        Value = names(params$contrasts),
+        Description = "Contrasts for DESeq2 analysis"
     ),
     list(
         Parameter = names(params[8]),
         Value = params[[8]],
-        Description = "Colname in the metadata used as factor for Differential Expression_2"
+        Description = "pCutoff for the volcano plot"
     ),
-    list(
+      list(
         Parameter = names(params[9]),
-        Value = names(params$contrasts),
-        Description = "Contrasts for DESeq2 analysis_1"
-    ),
-    list(
-        Parameter = names(params[10]),
-        Value = names(params$contrasts_2),
-        Description = "Contrasts for DESeq2 analysis_2"
+        Value = params[[9]],
+        Description = "FCutoff for the volcano plot"
     )
    
    
@@ -486,7 +498,9 @@ DT::datatable(jsonlite::fromJSON(parameters))
 
 ```{r}
 #| warning:  false
+#| label: output files table
 
+#output files as a list and later viewed in DT
 output_files <- list(
     list(
         File = "counts",
@@ -525,7 +539,7 @@ output_files <- list(
     ),
     list(
       File = "PCA",
-        Link = "<a href='./rna_seq_files/figure-html/fig-pcaplot-1.png> pca </a>",
+        Link = "<a href='./rna_seq_files/figure-html/fig-pcaplot-1.png'> pca </a>",
         Description = "PCA plot using rlog-transformed values"
     ),
     list(
@@ -575,8 +589,9 @@ DT::datatable(jsonlite::fromJSON(output_files))
 
 ```{r}
 #| warning:  false
+#| label: session info
 
-
+#for the session info
 sessionInfo()
 ```
 
