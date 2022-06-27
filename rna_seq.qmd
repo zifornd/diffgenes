@@ -57,8 +57,9 @@ DT::datatable(matrix())
 options(DT.warn.size=FALSE)
 
 ```
+## Introduction
 
-## Metadata of samples
+### Metadata of samples
 
 ```{r}
 #| warning:  false
@@ -69,7 +70,7 @@ samples <- read.delim(params$sample_data)
 
 ```
 
-This section contains the sample metadata which includes the sample name , condition and type or batch effect if present.
+This section contains the metadata of the sample used in this analysis which includes the sample name , condition and type or batch effect if present.
 
 ```{r}
 #| warning:  false
