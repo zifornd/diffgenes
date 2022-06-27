@@ -405,8 +405,17 @@ gene_names<-rownames(res)[genes]
 
 #getting the gene symbols of those 20 rownames
 names<-res$symbol[gene_names]
+
 #making it into a dataframe
 names<-data.frame(names)
+
+#convert to ensembl ids when gene symbol is NA
+names[which(is.na(names[,"names"])),"names"] = 0
+for(i in (1:nrow(names)))
+  if (names$names[i]=="0")
+    
+    names$names[i]<- rownames(names)[i]
+  
 
 # to see the actual data,the fragment counts,using the assay function.
 data<-colnames(assay(rld_downstream)[gene_names,])
