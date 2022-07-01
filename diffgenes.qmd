@@ -57,6 +57,7 @@ DT::datatable(matrix())
 options(DT.warn.size=FALSE)
 
 ```
+
 ## Introduction
 
 ### Metadata of samples
@@ -267,7 +268,7 @@ This section contains the results table which has the differentially expressed g
 
 #### Contrast factor - Condition
 
-::: {.panel-tabset}
+::: panel-tabset
 ```{r}
 #| results: "asis"
 #| warning:  false
@@ -623,4 +624,3 @@ $( "input.hideshow" ).each( function ( index, button ) {
 } );
 </script>
 ```
-
